@@ -1,6 +1,7 @@
 #include <w2v.h>
 #include <algorithm>
 #include <cmath>
+#include <functional>
 
 namespace w2v {
 
@@ -29,6 +30,39 @@ std::vector<double> stable_softmax(const std::vector<double> &v)
     std::vector<double> ret(v.size());
     for (int i = 0;  i < v.size();  ++i)
         ret[i] = exp(v[i] - max) / sum;
+    return ret;
+}
+
+double magnitude(const std::vector<double>& v)
+{
+    double ret = 0.0;
+    for (auto x : v)
+        ret += x * x;
+    return sqrt(ret);
+}
+
+double dot_product(const std::vector<double>& v1, const std::vector<double>& v2)
+{
+    double ret = 0.0;
+    for (int i = 0;  i < v1.size();  ++i)
+        ret += v1[i] * v2[i];
+    return ret;
+}
+
+double cosine_distance(const std::vector<double>& v1, const std::vector<double>& v2)
+{
+    return dot_product(v1, v2) / (magnitude(v1) * magnitude(v2));
+}
+
+std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vector<std::vector<double>>& points)
+{
+    std::vector<std::pair<double, int>> distances(points.size());
+    for (int i = 0;  i < points.size();  ++i)
+        distances[i] = std::make_pair(cosine_distance(v, points[i]), i);
+    std::sort(distances.begin(), distances.end(), std::greater<>());
+    std::vector<int> ret(points.size());
+    for (int i = 0;  i < points.size();  ++i)
+        ret[i] = distances[i].second;
     return ret;
 }
 
