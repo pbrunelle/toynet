@@ -21,4 +21,28 @@ double cosine_distance(const std::vector<double>& v1, const std::vector<double>&
 // pre-condition: for each p in points: p.size() == v.size() && ||p|| != 0
 std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vector<std::vector<double>>& points);
 
+// An implementation of the Continuous Bag-of-Words Model from
+// https://arxiv.org/abs/1301.3781.
+struct CBOWModel {
+    // Parameters:
+    // - W: the number of words in the vocabulary
+    // - D: the embedding size
+    // - historyN: the number of words *before* the current (middle) word
+    // - futureN: the number of words *after* the current (middle) word
+    // Pre-conditions:
+    // - W > 0
+    // - D > 0
+    // - historyN + futureN > 0
+    CBOWModel(int W, int D=50, int historyN=4, int futureN=4);
+
+    int W;
+    int D;
+    int historyN;
+    int futureN;
+    // The matrix between the input layer and the projection layer
+    // P[word_index][projection_layer_index]
+    // (i.e. the words embeddings)
+    std::vector<std::vector<double>> P;
+};
+
 } // namespace w2v

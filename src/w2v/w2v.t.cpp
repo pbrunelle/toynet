@@ -212,7 +212,10 @@ BOOST_AUTO_TEST_CASE(nearest_neighbors_size_1_not_equal)
 BOOST_AUTO_TEST_CASE(nearest_neighbors_size_2)
 {
     const std::vector<double> v{-1, -1, 0};
-    const std::vector<std::vector<double>> points{{-1, 0, -1}, {-1, -1, 0}};
+    const std::vector<std::vector<double>> points{
+        {-1, 0, -1},
+        {-1, -1, 0}
+    };
     const std::vector<int> expected{1, 0};
     const std::vector<int> got = nearest_neighbors(v, points);
     BOOST_CHECK_EQUAL(expected, got);
@@ -221,9 +224,61 @@ BOOST_AUTO_TEST_CASE(nearest_neighbors_size_2)
 BOOST_AUTO_TEST_CASE(nearest_neighbors_size_4)
 {
     const std::vector<double> v{-1, -1, 0};
-    const std::vector<std::vector<double>> points{{-2, -1, 0}, {-1, 0, -1}, {-1, -1, 0}, {-3, -1, 0}};
+    const std::vector<std::vector<double>> points{
+        {-2, -1, 0},
+        {-1, 0, -1},
+        {-1, -1, 0},
+        {-3, -1, 0}
+    };
     const std::vector<int> expected{2, 0, 3, 1};
     const std::vector<int> got = nearest_neighbors(v, points);
     BOOST_CHECK_EQUAL(expected, got);
+}
+
+BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W1_defaults)
+{
+    CBOWModel model(1);
+    BOOST_CHECK_EQUAL(1, model.W);
+    BOOST_CHECK_EQUAL(50, model.D);
+    BOOST_CHECK_EQUAL(4, model.historyN);
+    BOOST_CHECK_EQUAL(4, model.futureN);
+    BOOST_CHECK_EQUAL(1, model.P.size());
+    BOOST_CHECK_EQUAL(50, model.P[0].size());
+}
+
+BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W2_defaults)
+{
+    CBOWModel model(2);
+    BOOST_CHECK_EQUAL(2, model.W);
+    BOOST_CHECK_EQUAL(50, model.D);
+    BOOST_CHECK_EQUAL(4, model.historyN);
+    BOOST_CHECK_EQUAL(4, model.futureN);
+    BOOST_CHECK_EQUAL(2, model.P.size());
+    BOOST_CHECK_EQUAL(50, model.P[0].size());
+    BOOST_CHECK_EQUAL(50, model.P[1].size());
+}
+
+BOOST_AUTO_TEST_CASE(CBOWModel_constructor_no_defaults)
+{
+    CBOWModel model(3, 4, 5, 6);
+    BOOST_CHECK_EQUAL(3, model.W);
+    BOOST_CHECK_EQUAL(4, model.D);
+    BOOST_CHECK_EQUAL(5, model.historyN);
+    BOOST_CHECK_EQUAL(6, model.futureN);
+    BOOST_CHECK_EQUAL(3, model.P.size());
+    BOOST_CHECK_EQUAL(4, model.P[0].size());
+}
+
+BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W_1000000_D_100)
+{
+    // The matrix takes 1e6 * 1e2 * 8 bytes = 8e9 bytes = 800 MiB
+    CBOWModel model(1000000, 100);
+    BOOST_CHECK_EQUAL(1000000, model.W);
+    BOOST_CHECK_EQUAL(100, model.D);
+    BOOST_CHECK_EQUAL(4, model.historyN);
+    BOOST_CHECK_EQUAL(4, model.futureN);
+    BOOST_CHECK_EQUAL(1000000, model.P.size());
+    BOOST_CHECK_EQUAL(100, model.P[0].size());
+    BOOST_CHECK_EQUAL(100, model.P[1000000-1].size());
 }
 

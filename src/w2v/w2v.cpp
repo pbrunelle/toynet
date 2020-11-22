@@ -66,4 +66,13 @@ std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vect
     return ret;
 }
 
+CBOWModel::CBOWModel(int W, int D, int historyN, int futureN)
+    : W(W)
+    , D(D)
+    , historyN(historyN)
+    , futureN(futureN)
+    , P(W, std::vector<double>(D))
+{
+}
+
 } // namespace w2v
