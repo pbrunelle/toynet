@@ -262,6 +262,23 @@ BOOST_AUTO_TEST_CASE(add_size_2)
     BOOST_CHECK_EQUAL(expected, to);
 }
 
+BOOST_AUTO_TEST_CASE(get_context_6)
+{
+    const std::vector<int> words{78, 333, 0, 99, 15, 4, 2, 2, 78, 99};
+    const std::vector<int> expected1{333, 0, 99, 15, 4, 2, 2, 78, 99};
+    const std::vector<int> expected2{333, 0};
+    const std::vector<int> expected3{78, 333, 99, 15, 4};
+    const std::vector<int> expected4{4, 2};
+    const std::vector<int> expected5{4, 2, 2, 99};
+    const std::vector<int> expected6{2, 2, 78};
+    BOOST_CHECK_EQUAL(expected1, get_context(words, 0, 10, 10));
+    BOOST_CHECK_EQUAL(expected2, get_context(words, 0, 10, 2));
+    BOOST_CHECK_EQUAL(expected3, get_context(words, 2, 4, 3));
+    BOOST_CHECK_EQUAL(expected4, get_context(words, 6, 1, 1));
+    BOOST_CHECK_EQUAL(expected5, get_context(words, 8, 3, 3));
+    BOOST_CHECK_EQUAL(expected6, get_context(words, 9, 3, 3));
+}
+
 BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W1_defaults)
 {
     CBOWModel model(1);
@@ -412,5 +429,26 @@ BOOST_AUTO_TEST_CASE(CBOWModel_predict_context_3)
     BOOST_CHECK_CLOSE(prediction[2].first, 0.22074601, 1e-4);
     BOOST_CHECK_EQUAL(prediction[3].second, 1);
     BOOST_CHECK_CLOSE(prediction[3].first, 0.19816092, 1e-4);
+}
+
+BOOST_AUTO_TEST_CASE(CBOWModel_avg_log_prob)
+{
+    CBOWModel model(4, 3, 2, 2);
+    model.P = {
+        {0.19,  0.11, -0.14},
+        {0.04,  0.30, -0.20},
+        {0.77, -0.03,  0.11},
+        {0.33, -0.43,  0.81},
+    };
+    model.O = {
+        {0.42, -0.28,  0.19},
+        {0.77, -0.93,  0.11},
+        {0.33, -0.43, -0.81},
+        {0.94,  0.90, -0.20},
+    };
+    const std::vector<int> words{0, 2, 0, 1, 1, 2, 0};
+    const double log_p = model.avg_log_prob(words);
+    BOOST_CHECK(log_p <= 0.0);
+    // std::cout << log_p << std::endl;
 }
 

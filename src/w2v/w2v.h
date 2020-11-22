@@ -28,6 +28,13 @@ std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vect
 // pre-condition: to.size() == other.size()
 void add(std::vector<double>& to, const std::vector<double>& other);
 
+// Get the context around word `index` from a corpus `words`, using a maximum
+// of `historyN` words before `index` and `futureN` words after `index`.
+// The word at `index` is *not* part of the context.
+// The number of context words is less than `historyN + futureN` for words
+// close to the beginning or end of the corpus.
+std::vector<int> get_context(const std::vector<int>& words, int index, int historyN, int futureN);
+
 // An implementation of the Continuous Bag-of-Words Model from
 // https://arxiv.org/abs/1301.3781.
 struct CBOWModel {
@@ -66,6 +73,25 @@ struct CBOWModel {
     //   -  The returned probabilities sum to 1
     //   -  The returned list is of size W
     std::vector<std::pair<double, int>> predict(const std::vector<int>& context) const;
+
+    // Like the previous `predict` function, but only returns the probability
+    // for word index `word`.
+    // Pre-conditions:
+    //   - 0 <= `word` < W
+    double predict(const std::vector<int>& context, int word) const;
+
+    // Helper function for `predict` methods above
+    std::vector<double> predict_helper(const std::vector<int>& context) const;
+
+    // Given a corpus `words`, compute the average log probability, as defined
+    // in https://arxiv.org/abs/1310.4546:
+    //     1/T * sum{t=1, T}(log(p(w_t | context)))
+    // where T is the size of `words`.
+    // Parameters:
+    //   - words: the corpus, a list of word indices
+    // Pre-conditions:
+    //   - For each `w` in `words`: 0 <= `w` < W
+    double avg_log_prob(const std::vector<int>& words) const;
 
     friend class boost::serialization::access;
 

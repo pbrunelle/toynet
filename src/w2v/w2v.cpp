@@ -74,6 +74,16 @@ void add(std::vector<double>& to, const std::vector<double>& other)
         to[i] += other[i];
 }
 
+std::vector<int> get_context(const std::vector<int>& words, int index, int historyN, int futureN)
+{
+    std::vector<int> ret;
+    for (int j = std::max(0, index - historyN);  j < index;  ++j)
+        ret.push_back(words[j]);
+    for (int j = 1;  j <= futureN && index+j < words.size();  ++j)
+        ret.push_back(words[index+j]);
+    return ret;
+}
+
 CBOWModel::CBOWModel(int W, int D, int historyN, int futureN)
     : W(W)
     , D(D)
@@ -98,6 +108,22 @@ void CBOWModel::load(std::istream& is)
 
 std::vector<std::pair<double, int>> CBOWModel::predict(const std::vector<int>& context) const
 {
+    std::vector<double> smax = predict_helper(context);
+    std::vector<std::pair<double, int>> ret(W);
+    for (int i = 0;  i < W;  ++i)
+        ret[i] = std::make_pair(smax[i], i);
+    std::sort(ret.begin(), ret.end(), std::greater<>());
+    return ret;
+}
+
+double CBOWModel::predict(const std::vector<int>& context, int word) const
+{
+    std::vector<double> smax = predict_helper(context);
+    return smax[word];
+}
+
+std::vector<double> CBOWModel::predict_helper(const std::vector<int>& context) const
+{
     // average embedding of all context words
     std::vector<double> avg(D, 0.0);
     for (int wordidx : context)
@@ -110,12 +136,18 @@ std::vector<std::pair<double, int>> CBOWModel::predict(const std::vector<int>& c
         out[i] = dot_product(avg, O[i]);
     // softmax
     std::vector<double> smax = softmax(out);
-    // return value
-    std::vector<std::pair<double, int>> ret(W);
-    for (int i = 0;  i < W;  ++i)
-        ret[i] = std::make_pair(smax[i], i);
-    std::sort(ret.begin(), ret.end(), std::greater<>());
-    return ret;
+    return smax;
+}
+
+double CBOWModel::avg_log_prob(const std::vector<int>& words) const
+{
+    double sum = 0.0;
+    for (int i = 0;  i < words.size();  ++i) {
+        std::vector<int> context = get_context(words, i, historyN, futureN);
+        double p = predict(context, words[i]);
+        sum += std::log(p);
+    }
+    return sum / words.size();
 }
 
 } // namespace w2v
