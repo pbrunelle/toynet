@@ -1,4 +1,7 @@
+#include <iostream>
 #include <vector>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/vector.hpp>
 
 namespace w2v {
 
@@ -34,6 +37,24 @@ struct CBOWModel {
     // - D > 0
     // - historyN + futureN > 0
     CBOWModel(int W, int D=50, int historyN=4, int futureN=4);
+
+    // Save the model to an output stream using Boost serialization
+    void save(std::ostream& os) const;
+
+    // Load a model from an input stream using Boost serialization
+    void load(std::istream& is);
+
+    friend class boost::serialization::access;
+
+    template<class Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+        ar & W;
+        ar & D;
+        ar & historyN;
+        ar & futureN;
+        ar & P;
+    }
 
     int W;
     int D;

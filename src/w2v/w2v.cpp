@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 namespace w2v {
 
@@ -73,6 +75,18 @@ CBOWModel::CBOWModel(int W, int D, int historyN, int futureN)
     , futureN(futureN)
     , P(W, std::vector<double>(D))
 {
+}
+
+void CBOWModel::save(std::ostream& os) const
+{
+    boost::archive::text_oarchive oa(os);
+    oa << *this;
+}
+
+void CBOWModel::load(std::istream& is)
+{
+    boost::archive::text_iarchive ia(is);
+    ia >> *this;
 }
 
 } // namespace w2v

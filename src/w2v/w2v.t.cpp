@@ -2,7 +2,7 @@
 #include <stlio.h>
 #include <iostream>
 #define BOOST_TEST_MODULE w2v
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 using namespace w2v;
 
@@ -280,5 +280,20 @@ BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W_1000000_D_100)
     BOOST_CHECK_EQUAL(1000000, model.P.size());
     BOOST_CHECK_EQUAL(100, model.P[0].size());
     BOOST_CHECK_EQUAL(100, model.P[1000000-1].size());
+}
+
+BOOST_AUTO_TEST_CASE(CBOWModel_save_load)
+{
+    CBOWModel model(3, 4, 5, 6);
+    std::stringstream ss;
+    model.save(ss);
+    CBOWModel model2(1);
+    model2.load(ss);
+    BOOST_CHECK_EQUAL(3, model2.W);
+    BOOST_CHECK_EQUAL(4, model2.D);
+    BOOST_CHECK_EQUAL(5, model2.historyN);
+    BOOST_CHECK_EQUAL(6, model2.futureN);
+    BOOST_CHECK_EQUAL(3, model2.P.size());
+    BOOST_CHECK_EQUAL(4, model2.P[0].size());
 }
 
