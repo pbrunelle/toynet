@@ -74,6 +74,7 @@ CBOWModel::CBOWModel(int W, int D, int historyN, int futureN)
     , historyN(historyN)
     , futureN(futureN)
     , P(W, std::vector<double>(D))
+    , O(W, std::vector<double>(D))
 {
 }
 

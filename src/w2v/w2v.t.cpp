@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(CBOWModel_constructor_no_defaults)
 
 BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W_1000000_D_100)
 {
-    // The matrix takes 1e6 * 1e2 * 8 bytes = 8e9 bytes = 800 MiB
+    // Each matrix takes 1e6 * 1e2 * 8 bytes = 8e9 bytes = 800 MiB
     CBOWModel model(1000000, 100);
     BOOST_CHECK_EQUAL(1000000, model.W);
     BOOST_CHECK_EQUAL(100, model.D);
@@ -280,6 +280,8 @@ BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W_1000000_D_100)
     BOOST_CHECK_EQUAL(1000000, model.P.size());
     BOOST_CHECK_EQUAL(100, model.P[0].size());
     BOOST_CHECK_EQUAL(100, model.P[1000000-1].size());
+    BOOST_CHECK_EQUAL(100, model.O[0].size());
+    BOOST_CHECK_EQUAL(100, model.O[1000000-1].size());
 }
 
 BOOST_AUTO_TEST_CASE(CBOWModel_save_load)
@@ -295,5 +297,7 @@ BOOST_AUTO_TEST_CASE(CBOWModel_save_load)
     BOOST_CHECK_EQUAL(6, model2.futureN);
     BOOST_CHECK_EQUAL(3, model2.P.size());
     BOOST_CHECK_EQUAL(4, model2.P[0].size());
+    BOOST_CHECK_EQUAL(3, model2.O.size());
+    BOOST_CHECK_EQUAL(4, model2.O[0].size());
 }
 

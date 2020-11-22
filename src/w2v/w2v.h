@@ -54,6 +54,7 @@ struct CBOWModel {
         ar & historyN;
         ar & futureN;
         ar & P;
+        ar & O;
     }
 
     int W;
@@ -64,6 +65,10 @@ struct CBOWModel {
     // P[word_index][projection_layer_index]
     // (i.e. the words embeddings)
     std::vector<std::vector<double>> P;
+    // The matrix between the projection layer and the output layer
+    // P[word_index][projection_layer_index]
+    // (i.e. used to predict most likely words)
+    std::vector<std::vector<double>> O;
 };
 
 } // namespace w2v
