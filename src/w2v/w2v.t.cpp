@@ -371,3 +371,46 @@ BOOST_AUTO_TEST_CASE(CBOWModel_predict_context_1)
     BOOST_CHECK_CLOSE(prediction[3].first, 0.18496545, 1e-4);
 }
 
+BOOST_AUTO_TEST_CASE(CBOWModel_predict_context_3)
+{
+    CBOWModel model(4, 3, 2, 2);
+    model.P = {
+        {0.19,  0.11, -0.14},
+        {0.04,  0.30, -0.20},
+        {0.77, -0.03,  0.11},
+        {0.33, -0.43,  0.81},
+    };
+    model.O = {
+        {0.42, -0.28,  0.19},
+        {0.77, -0.93,  0.11},
+        {0.33, -0.43, -0.81},
+        {0.94,  0.90, -0.20},
+    };
+    std::vector<std::pair<double, int>> prediction = model.predict({1, 1, 0});
+    BOOST_CHECK_EQUAL(4, prediction.size());
+    double sum = 0;
+    for (const auto& pred : prediction) {
+        sum += pred.first;
+        BOOST_CHECK(pred.first >= 0.0);
+        BOOST_CHECK(pred.first <= 1.0);
+        BOOST_CHECK(pred.second >= 0);
+        BOOST_CHECK(pred.second < 4);
+    }
+    BOOST_CHECK_CLOSE(sum, 1.0, 1e-12);
+    // output values (before softmax):
+    // [0]: 2/3 * (0.04, 0.30, -0.20) dot (0.42, -0.28, 0.19) + 1/3 * (0.19, 0.11, -0.14) dot (0.42, -0.28, 0.19) = -0.062666
+    // [1]: 2/3 * (0.04, 0.30, -0.20) dot (0.77, -0.93, 0.11) + 1/3 * (0.19, 0.11, -0.14) dot (0.77, -0.93, 0.11) = -0.1706
+    // [2]: 2/3 * (0.04, 0.30, -0.20) dot (0.33, -0.43, -0.81) + 1/3 * (0.19, 0.11, -0.14) dot (0.33, -0.43, -0.81) = 0.073733
+    // [3]: 2/3 * (0.04, 0.30, -0.20) dot (0.94, 0.90, -0.20) + 1/3 * ((0.19, 0.11, -0.14)  dot (0.94, 0.90, -0.20) = 0.3336
+    // after softmax:
+    // (0.22074601, 0.19816092, 0.25300588, 0.32808719)
+    BOOST_CHECK_EQUAL(prediction[0].second, 3);
+    BOOST_CHECK_CLOSE(prediction[0].first, 0.32808719, 1e-4);
+    BOOST_CHECK_EQUAL(prediction[1].second, 2);
+    BOOST_CHECK_CLOSE(prediction[1].first, 0.25300588, 1e-4);
+    BOOST_CHECK_EQUAL(prediction[2].second, 0);
+    BOOST_CHECK_CLOSE(prediction[2].first, 0.22074601, 1e-4);
+    BOOST_CHECK_EQUAL(prediction[3].second, 1);
+    BOOST_CHECK_CLOSE(prediction[3].first, 0.19816092, 1e-4);
+}
+
