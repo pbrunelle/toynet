@@ -235,6 +235,33 @@ BOOST_AUTO_TEST_CASE(nearest_neighbors_size_4)
     BOOST_CHECK_EQUAL(expected, got);
 }
 
+BOOST_AUTO_TEST_CASE(add_size_0)
+{
+    std::vector<double> to{};
+    const std::vector<double> other{};
+    const std::vector<double> expected{};
+    add(to, other);
+    BOOST_CHECK_EQUAL(expected, to);
+}
+
+BOOST_AUTO_TEST_CASE(add_size_1)
+{
+    std::vector<double> to{1.5};
+    const std::vector<double> other{-2.5};
+    const std::vector<double> expected{-1.0};
+    add(to, other);
+    BOOST_CHECK_EQUAL(expected, to);
+}
+
+BOOST_AUTO_TEST_CASE(add_size_2)
+{
+    std::vector<double> to{1.5, 0.25};
+    const std::vector<double> other{-2.5, 0.75};
+    const std::vector<double> expected{-1.0, 1.0};
+    add(to, other);
+    BOOST_CHECK_EQUAL(expected, to);
+}
+
 BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W1_defaults)
 {
     CBOWModel model(1);
@@ -299,5 +326,48 @@ BOOST_AUTO_TEST_CASE(CBOWModel_save_load)
     BOOST_CHECK_EQUAL(4, model2.P[0].size());
     BOOST_CHECK_EQUAL(3, model2.O.size());
     BOOST_CHECK_EQUAL(4, model2.O[0].size());
+}
+
+BOOST_AUTO_TEST_CASE(CBOWModel_predict_context_1)
+{
+    CBOWModel model(4, 3, 2, 2);
+    model.P = {
+        {0.19,  0.11, -0.14},
+        {0.04,  0.30, -0.20},
+        {0.77, -0.03,  0.11},
+        {0.33, -0.43,  0.81},
+    };
+    model.O = {
+        {0.42, -0.28,  0.19},
+        {0.77, -0.93,  0.11},
+        {0.33, -0.43, -0.81},
+        {0.94,  0.90, -0.20},
+    };
+    std::vector<std::pair<double, int>> prediction = model.predict({1});
+    BOOST_CHECK_EQUAL(4, prediction.size());
+    double sum = 0;
+    for (const auto& pred : prediction) {
+        sum += pred.first;
+        BOOST_CHECK(pred.first >= 0.0);
+        BOOST_CHECK(pred.first <= 1.0);
+        BOOST_CHECK(pred.second >= 0);
+        BOOST_CHECK(pred.second < 4);
+    }
+    BOOST_CHECK_CLOSE(sum, 1.0, 1e-12);
+    // output values (before softmax):
+    // [0]: (0.04, 0.30, -0.20) dot (0.42, -0.28, 0.19) = -0.1052
+    // [1]: (0.04, 0.30, -0.20) dot (0.77, -0.93, 0.11) = -0.2702
+    // [2]: (0.04, 0.30, -0.20) dot (0.33, -0.43, -0.81) = 0.0462
+    // [3]: (0.04, 0.30, -0.20) dot (0.94, 0.90, -0.20) = 0.3476
+    // after softmax:
+    // (0.21814698, 0.18496545, 0.25380571, 0.34308185)
+    BOOST_CHECK_EQUAL(prediction[0].second, 3);
+    BOOST_CHECK_CLOSE(prediction[0].first, 0.34308185, 1e-4);
+    BOOST_CHECK_EQUAL(prediction[1].second, 2);
+    BOOST_CHECK_CLOSE(prediction[1].first, 0.25380571, 1e-4);
+    BOOST_CHECK_EQUAL(prediction[2].second, 0);
+    BOOST_CHECK_CLOSE(prediction[2].first, 0.21814698, 1e-4);
+    BOOST_CHECK_EQUAL(prediction[3].second, 1);
+    BOOST_CHECK_CLOSE(prediction[3].first, 0.18496545, 1e-4);
 }
 

@@ -68,6 +68,12 @@ std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vect
     return ret;
 }
 
+void add(std::vector<double>& to, const std::vector<double>& other)
+{
+    for (int i = 0;  i < to.size();  ++i)
+        to[i] += other[i];
+}
+
 CBOWModel::CBOWModel(int W, int D, int historyN, int futureN)
     : W(W)
     , D(D)
@@ -88,6 +94,28 @@ void CBOWModel::load(std::istream& is)
 {
     boost::archive::text_iarchive ia(is);
     ia >> *this;
+}
+
+std::vector<std::pair<double, int>> CBOWModel::predict(const std::vector<int>& context) const
+{
+    // average embedding of all context words
+    std::vector<double> avg(D, 0.0);
+    for (int wordidx : context)
+        add(avg, P[wordidx]);
+    for (double &a : avg)
+        a /= context.size();
+    // output layer (before softmax)
+    std::vector<double> out(W, 0.0);
+    for (int i = 0;  i < W;  ++i)
+        out[i] = dot_product(avg, O[i]);
+    // softmax
+    std::vector<double> smax = softmax(out);
+    // return value
+    std::vector<std::pair<double, int>> ret(W);
+    for (int i = 0;  i < W;  ++i)
+        ret[i] = std::make_pair(smax[i], i);
+    std::sort(ret.begin(), ret.end(), std::greater<>());
+    return ret;
 }
 
 } // namespace w2v

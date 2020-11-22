@@ -13,6 +13,14 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& o)
         os << o[i];
     }
     os << "]";
+    return os;
+}
+
+template<class T, class U>
+std::ostream& operator<<(std::ostream& os, const std::pair<T, U>& o)
+{
+    os << "(" << o.first << ", " << o.second << ")";
+    return os;
 }
 
 } // namespace std

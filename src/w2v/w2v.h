@@ -24,6 +24,10 @@ double cosine_distance(const std::vector<double>& v1, const std::vector<double>&
 // pre-condition: for each p in points: p.size() == v.size() && ||p|| != 0
 std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vector<std::vector<double>>& points);
 
+// element-wise addition
+// pre-condition: to.size() == other.size()
+void add(std::vector<double>& to, const std::vector<double>& other);
+
 // An implementation of the Continuous Bag-of-Words Model from
 // https://arxiv.org/abs/1301.3781.
 struct CBOWModel {
@@ -43,6 +47,25 @@ struct CBOWModel {
 
     // Load a model from an input stream using Boost serialization
     void load(std::istream& is);
+
+    // Return the list of word indices with their associated probability
+    // given a list of context word indices.
+    // Parameters:
+    //   - context: the list of context word indices, i.e. if there are 2 context
+    //      words, this list should contain 2 elements, the indices of each context
+    //      word.  A word index can appear more than once.  The order is not important.
+    //      This model computes the *average* of each word embedding before using
+    //      those to compute output probabilities.
+    // Return value: A list of dimension W, where each element is a pair:
+    //      first = the probability of the corresponding word index
+    //      second = the word index
+    //      The list is sorted descending according to the probability
+    // Pre-consitions:
+    //   -  For each `i` in `context`: 0 <= `i` < W
+    // Post-conditions:
+    //   -  The returned probabilities sum to 1
+    //   -  The returned list is of size W
+    std::vector<std::pair<double, int>> predict(const std::vector<int>& context) const;
 
     friend class boost::serialization::access;
 
