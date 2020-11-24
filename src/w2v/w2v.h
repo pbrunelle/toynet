@@ -123,6 +123,7 @@ struct CBOWModel {
 struct ReportData {
     int epoch;
     double avg_log_prob;
+    double lr;
 };
 
 struct Reporter {
@@ -133,6 +134,20 @@ struct SimpleReporter : public Reporter {
     SimpleReporter(std::ostream& os);
     virtual void operator()(const ReportData& data) const override;
     std::ostream& os;
+};
+
+struct LearningRate {
+    virtual double operator()(int epoch) const = 0;
+};
+
+// For the first `cutoff` epochs, learning rate = lr
+// Afterwards, learning rate = lr * base ^ (cutoff - epoch)
+struct SimpleLearningRate : public LearningRate {
+    SimpleLearningRate(double lr=1.0, int cutoff=3, double base=0.5);
+    virtual double operator()(int epoch) const override;
+    double lr;
+    int cutoff;
+    double base;
 };
 
 struct Trainer {
@@ -148,6 +163,12 @@ struct Trainer {
 
     Trainer& setInitReporter(const Reporter *initReporter);
 
+    Trainer& setEpochReporter(const Reporter *epochReporter);
+
+    Trainer& setExitReporter(const Reporter *exitReporter);
+
+    Trainer& setLearningRate(const LearningRate *learningRate);
+
     // Pre-conditions: corpus.size() > 0
     CBOWModel train(const std::vector<int>& corpus) const;
 
@@ -156,6 +177,9 @@ struct Trainer {
     int historyN;
     int futureN;
     const Reporter *initReporter;
+    const Reporter *epochReporter;
+    const Reporter *exitReporter;
+    const LearningRate *learningRate;
 };
 
 } // namespace w2v

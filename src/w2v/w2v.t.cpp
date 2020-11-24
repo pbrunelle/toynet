@@ -454,18 +454,47 @@ BOOST_AUTO_TEST_CASE(CBOWModel_avg_log_prob)
 
 BOOST_AUTO_TEST_CASE(ReportData_constructor)
 {
-    ReportData data{10, -0.05};
+    ReportData data{10, -0.05, 1.0};
     BOOST_CHECK_EQUAL(10, data.epoch);
     BOOST_CHECK_EQUAL(-0.05, data.avg_log_prob);
+    BOOST_CHECK_EQUAL(1.0, data.lr);
 };
 
 BOOST_AUTO_TEST_CASE(SimpleReporter_operator_parens)
 {
-    ReportData data{10, -0.05};
+    ReportData data{10, -0.05, 1.0};
     std::stringstream ss;
     SimpleReporter reporter(ss);
     reporter(data);
-    BOOST_CHECK_EQUAL("epoch 10 avg_log_prob -0.05", ss.str());
+    BOOST_CHECK_EQUAL("epoch 10 prob -0.05 lr 1\n", ss.str());
+}
+
+BOOST_AUTO_TEST_CASE(SimpleLearningRate_constructor_default)
+{
+    SimpleLearningRate slr;
+    BOOST_CHECK_EQUAL(1.0, slr.lr);
+    BOOST_CHECK_EQUAL(3, slr.cutoff);
+    BOOST_CHECK_EQUAL(0.5, slr.base);
+}
+
+BOOST_AUTO_TEST_CASE(SimpleLearningRate_constructor)
+{
+    SimpleLearningRate slr(4.0, 10, 0.25);
+    BOOST_CHECK_EQUAL(4.0, slr.lr);
+    BOOST_CHECK_EQUAL(10, slr.cutoff);
+    BOOST_CHECK_EQUAL(0.25, slr.base);
+}
+
+BOOST_AUTO_TEST_CASE(SimpleLearningRate_operator_parens)
+{
+    SimpleLearningRate slr;
+    BOOST_CHECK_EQUAL(1.0, slr(0));
+    BOOST_CHECK_EQUAL(1.0, slr(1));
+    BOOST_CHECK_EQUAL(1.0, slr(2));
+    BOOST_CHECK_EQUAL(1.0, slr(3));
+    BOOST_CHECK_EQUAL(0.5, slr(4));
+    BOOST_CHECK_EQUAL(0.25, slr(5));
+    BOOST_CHECK_EQUAL(0.125, slr(6));
 }
 
 BOOST_AUTO_TEST_CASE(Trainer_constructor)
@@ -476,22 +505,62 @@ BOOST_AUTO_TEST_CASE(Trainer_constructor)
     BOOST_CHECK_EQUAL(4, trainer.historyN);
     BOOST_CHECK_EQUAL(4, trainer.futureN);
     BOOST_CHECK_EQUAL(nullptr, trainer.initReporter);
+    BOOST_CHECK_EQUAL(nullptr, trainer.epochReporter);
+    BOOST_CHECK_EQUAL(nullptr, trainer.exitReporter);
+    BOOST_CHECK_EQUAL(nullptr, trainer.learningRate);
 }
 
 BOOST_AUTO_TEST_CASE(Trainer_setters)
 {
     std::stringstream ss;
     SimpleReporter initReporter(ss);
+    SimpleReporter epochReporter(ss);
+    SimpleReporter exitReporter(ss);
+    SimpleLearningRate learningRate;
     Trainer trainer;
     trainer.setEpochs(20)
            .setEmbeddingSize(640)
            .setHistoryN(9)
            .setFutureN(7)
-           .setInitReporter(&initReporter);
+           .setInitReporter(&initReporter)
+           .setEpochReporter(&epochReporter)
+           .setExitReporter(&exitReporter)
+           .setLearningRate(&learningRate);
     BOOST_CHECK_EQUAL(20, trainer.epochs);
     BOOST_CHECK_EQUAL(640, trainer.D);
     BOOST_CHECK_EQUAL(9, trainer.historyN);
     BOOST_CHECK_EQUAL(7, trainer.futureN);
     BOOST_CHECK_EQUAL(&initReporter, trainer.initReporter);
+    BOOST_CHECK_EQUAL(&epochReporter, trainer.epochReporter);
+    BOOST_CHECK_EQUAL(&exitReporter, trainer.exitReporter);
+    BOOST_CHECK_EQUAL(&learningRate, trainer.learningRate);
+}
+
+BOOST_AUTO_TEST_CASE(Trainer_train)
+{
+    std::stringstream ss;
+    SimpleReporter initReporter(ss);
+    SimpleLearningRate learningRate;
+    Trainer trainer;
+    trainer.setEpochs(5)
+           .setEmbeddingSize(2)
+           .setHistoryN(1)
+           .setFutureN(1)
+           .setInitReporter(&initReporter)
+           .setEpochReporter(&initReporter)
+           .setExitReporter(&initReporter)
+           .setLearningRate(&learningRate);
+    std::vector<int> words{1, 0};
+    CBOWModel model = trainer.train(words);
+    BOOST_CHECK_EQUAL(2, model.W);
+    BOOST_CHECK_EQUAL(2, model.D);
+    BOOST_CHECK_EQUAL(1, model.historyN);
+    BOOST_CHECK_EQUAL(1, model.futureN);
+    BOOST_CHECK_EQUAL(2, model.P.size());
+    BOOST_CHECK_EQUAL(2, model.P[0].size());
+    BOOST_CHECK_EQUAL(2, model.O.size());
+    BOOST_CHECK_EQUAL(2, model.O[0].size());
+    std::cout << ss.str() << std::endl;
+    // BOOST_CHECK_EQUAL(std::string(""), ss.str());
 }
 

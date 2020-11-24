@@ -155,10 +155,26 @@ SimpleReporter::SimpleReporter(std::ostream& os)
 {
 }
 
+SimpleLearningRate::SimpleLearningRate(double lr, int cutoff, double base)
+    : lr(lr)
+    , cutoff(cutoff)
+    , base(base)
+{
+}
+
 void SimpleReporter::operator()(const ReportData& data) const
 {
     os << "epoch " << data.epoch
-       << " avg_log_prob " << data.avg_log_prob;
+       << " prob " << data.avg_log_prob
+       << " lr " << data.lr
+       << "\n";
+}
+
+double SimpleLearningRate::operator()(int epoch) const
+{
+    return (epoch <= cutoff)
+         ? lr
+         : lr * std::pow(base, epoch - cutoff);
 }
 
 Trainer::Trainer()
@@ -167,6 +183,9 @@ Trainer::Trainer()
     , historyN(4)
     , futureN(4)
     , initReporter(nullptr)
+    , epochReporter(nullptr)
+    , exitReporter(nullptr)
+    , learningRate(nullptr)
 {
 }
 
@@ -200,20 +219,48 @@ Trainer& Trainer::setInitReporter(const Reporter *initReporter)
     return *this;
 }
 
-#if 0
+Trainer& Trainer::setEpochReporter(const Reporter *epochReporter)
+{
+    this->epochReporter = epochReporter;
+    return *this;
+}
+
+Trainer& Trainer::setExitReporter(const Reporter *exitReporter)
+{
+    this->exitReporter = exitReporter;
+    return *this;
+}
+
+Trainer& Trainer::setLearningRate(const LearningRate *learningRate)
+{
+    this->learningRate = learningRate;
+    return *this;
+}
+
 CBOWModel Trainer::train(const std::vector<int>& corpus) const
 {
     // Find W, the maximum number of words
     int W = *std::max_element(corpus.begin(), corpus.end()) + 1;
     CBOWModel model(W, D, historyN, futureN);
+    int e = 0;
     double avg_log_prob = model.avg_log_prob(corpus);
-    before_epochs_reporter({0, avg_log_prob});
-    for (int e = 1;  e <= epochs;  ++e) {
+    double lr = (*learningRate)(e);
+    if (initReporter)
+        (*initReporter)({e, avg_log_prob, lr});
+    while (e <= epochs) {
+        ++e;
+        // TODO: compute gradients of loss function w.r.t. P and O
+        // TODO: compute new learning rate
+        // TODO: update P and O weights based on gradients and learning rate
+        lr = learningRate ? (*learningRate)(e) : 1.0;
         avg_log_prob = model.avg_log_prob(corpus);
-        end_of_epoch_reporter({e, avg_log_prob});
+        if (epochReporter)
+            (*epochReporter)({e, avg_log_prob, lr});
+        // TODO: compute loss on validation data
     }
+    if (exitReporter)
+        (*exitReporter)({-1, avg_log_prob, lr});
     return model;
 }
-#endif
 
 } // namespace w2v
