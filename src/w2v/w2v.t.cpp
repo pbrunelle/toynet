@@ -459,6 +459,15 @@ BOOST_AUTO_TEST_CASE(ReportData_constructor)
     BOOST_CHECK_EQUAL(-0.05, data.avg_log_prob);
 };
 
+BOOST_AUTO_TEST_CASE(SimpleReporter_operator_parens)
+{
+    ReportData data{10, -0.05};
+    std::stringstream ss;
+    SimpleReporter reporter(ss);
+    reporter(data);
+    BOOST_CHECK_EQUAL("epoch 10 avg_log_prob -0.05", ss.str());
+}
+
 BOOST_AUTO_TEST_CASE(Trainer_constructor)
 {
     Trainer trainer;
@@ -466,18 +475,23 @@ BOOST_AUTO_TEST_CASE(Trainer_constructor)
     BOOST_CHECK_EQUAL(50, trainer.D);
     BOOST_CHECK_EQUAL(4, trainer.historyN);
     BOOST_CHECK_EQUAL(4, trainer.futureN);
+    BOOST_CHECK_EQUAL(nullptr, trainer.initReporter);
 }
 
 BOOST_AUTO_TEST_CASE(Trainer_setters)
 {
+    std::stringstream ss;
+    SimpleReporter initReporter(ss);
     Trainer trainer;
     trainer.setEpochs(20)
            .setEmbeddingSize(640)
            .setHistoryN(9)
-           .setFutureN(7);
+           .setFutureN(7)
+           .setInitReporter(&initReporter);
     BOOST_CHECK_EQUAL(20, trainer.epochs);
     BOOST_CHECK_EQUAL(640, trainer.D);
     BOOST_CHECK_EQUAL(9, trainer.historyN);
     BOOST_CHECK_EQUAL(7, trainer.futureN);
+    BOOST_CHECK_EQUAL(&initReporter, trainer.initReporter);
 }
 

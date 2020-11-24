@@ -125,9 +125,14 @@ struct ReportData {
     double avg_log_prob;
 };
 
-struct SimpleReporter {
+struct Reporter {
+    virtual void operator()(const ReportData& data) const = 0;
+};
+
+struct SimpleReporter : public Reporter {
     SimpleReporter(std::ostream& os);
-    void operator()(const ReportData& data) const;
+    virtual void operator()(const ReportData& data) const override;
+    std::ostream& os;
 };
 
 struct Trainer {
@@ -141,6 +146,8 @@ struct Trainer {
 
     Trainer& setFutureN(int futureN);
 
+    Trainer& setInitReporter(const Reporter *initReporter);
+
     // Pre-conditions: corpus.size() > 0
     CBOWModel train(const std::vector<int>& corpus) const;
 
@@ -148,6 +155,7 @@ struct Trainer {
     int D;
     int historyN;
     int futureN;
+    const Reporter *initReporter;
 };
 
 } // namespace w2v

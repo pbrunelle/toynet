@@ -150,11 +150,23 @@ double CBOWModel::avg_log_prob(const std::vector<int>& words) const
     return sum / words.size();
 }
 
+SimpleReporter::SimpleReporter(std::ostream& os)
+    : os(os)
+{
+}
+
+void SimpleReporter::operator()(const ReportData& data) const
+{
+    os << "epoch " << data.epoch
+       << " avg_log_prob " << data.avg_log_prob;
+}
+
 Trainer::Trainer()
     : epochs(1)
     , D(50)
     , historyN(4)
     , futureN(4)
+    , initReporter(nullptr)
 {
 }
 
@@ -179,6 +191,12 @@ Trainer& Trainer::setHistoryN(int historyN)
 Trainer& Trainer::setFutureN(int futureN)
 {
     this->futureN = futureN;
+    return *this;
+}
+
+Trainer& Trainer::setInitReporter(const Reporter *initReporter)
+{
+    this->initReporter = initReporter;
     return *this;
 }
 
