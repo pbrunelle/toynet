@@ -150,4 +150,47 @@ double CBOWModel::avg_log_prob(const std::vector<int>& words) const
     return sum / words.size();
 }
 
+Trainer::Trainer()
+    : epochs(1)
+    , D(50)
+    , historyN(4)
+    , futureN(4)
+{
+}
+
+Trainer& Trainer::setEpochs(int epochs)
+{
+    this->epochs = epochs;
+    return *this;
+}
+
+Trainer& Trainer::setEmbeddingSize(int D)
+{
+    this->D = D;
+    return *this;
+}
+
+Trainer& Trainer::setHistoryN(int historyN)
+{
+    this->historyN = historyN;
+    return *this;
+}
+
+Trainer& Trainer::setFutureN(int futureN)
+{
+    this->futureN = futureN;
+    return *this;
+}
+
+CBOWModel Trainer::train(const std::vector<int>& corpus) const
+{
+    // Find W, the maximum number of words
+    int W = *std::max_element(corpus.begin(), corpus.end()) + 1;
+    CBOWModel model(W, D, historyN, futureN);
+    for (int e = 1;  e <= epochs;  ++e) {
+        // double avg_log_prob(const std::vector<int>& words)
+    }
+    return model;
+}
+
 } // namespace w2v

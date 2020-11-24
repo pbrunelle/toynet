@@ -452,3 +452,25 @@ BOOST_AUTO_TEST_CASE(CBOWModel_avg_log_prob)
     // std::cout << log_p << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE(Trainer_constructor)
+{
+    Trainer trainer;
+    BOOST_CHECK_EQUAL(1, trainer.epochs);
+    BOOST_CHECK_EQUAL(50, trainer.D);
+    BOOST_CHECK_EQUAL(4, trainer.historyN);
+    BOOST_CHECK_EQUAL(4, trainer.futureN);
+}
+
+BOOST_AUTO_TEST_CASE(Trainer_setters)
+{
+    Trainer trainer;
+    trainer.setEpochs(20)
+           .setEmbeddingSize(640)
+           .setHistoryN(9)
+           .setFutureN(7);
+    BOOST_CHECK_EQUAL(20, trainer.epochs);
+    BOOST_CHECK_EQUAL(640, trainer.D);
+    BOOST_CHECK_EQUAL(9, trainer.historyN);
+    BOOST_CHECK_EQUAL(7, trainer.futureN);
+}
+

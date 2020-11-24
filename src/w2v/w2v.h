@@ -75,7 +75,7 @@ struct CBOWModel {
     std::vector<std::pair<double, int>> predict(const std::vector<int>& context) const;
 
     // Like the previous `predict` function, but only returns the probability
-    // for word index `word`.
+    // for word index `word`: p(word | context)
     // Pre-conditions:
     //   - 0 <= `word` < W
     double predict(const std::vector<int>& context, int word) const;
@@ -118,6 +118,26 @@ struct CBOWModel {
     // P[word_index][projection_layer_index]
     // (i.e. used to predict most likely words)
     std::vector<std::vector<double>> O;
+};
+
+struct Trainer {
+    Trainer();
+
+    Trainer& setEpochs(int epochs);
+
+    Trainer& setEmbeddingSize(int D);
+
+    Trainer& setHistoryN(int historyN);
+
+    Trainer& setFutureN(int futureN);
+
+    // Pre-conditions: corpus.size() > 0
+    CBOWModel train(const std::vector<int>& corpus) const;
+
+    int epochs;
+    int D;
+    int historyN;
+    int futureN;
 };
 
 } // namespace w2v
