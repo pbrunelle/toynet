@@ -182,15 +182,20 @@ Trainer& Trainer::setFutureN(int futureN)
     return *this;
 }
 
+#if 0
 CBOWModel Trainer::train(const std::vector<int>& corpus) const
 {
     // Find W, the maximum number of words
     int W = *std::max_element(corpus.begin(), corpus.end()) + 1;
     CBOWModel model(W, D, historyN, futureN);
+    double avg_log_prob = model.avg_log_prob(corpus);
+    before_epochs_reporter({0, avg_log_prob});
     for (int e = 1;  e <= epochs;  ++e) {
-        // double avg_log_prob(const std::vector<int>& words)
+        avg_log_prob = model.avg_log_prob(corpus);
+        end_of_epoch_reporter({e, avg_log_prob});
     }
     return model;
 }
+#endif
 
 } // namespace w2v

@@ -120,6 +120,16 @@ struct CBOWModel {
     std::vector<std::vector<double>> O;
 };
 
+struct ReportData {
+    int epoch;
+    double avg_log_prob;
+};
+
+struct SimpleReporter {
+    SimpleReporter(std::ostream& os);
+    void operator()(const ReportData& data) const;
+};
+
 struct Trainer {
     Trainer();
 

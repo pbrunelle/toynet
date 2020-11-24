@@ -452,6 +452,13 @@ BOOST_AUTO_TEST_CASE(CBOWModel_avg_log_prob)
     // std::cout << log_p << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE(ReportData_constructor)
+{
+    ReportData data{10, -0.05};
+    BOOST_CHECK_EQUAL(10, data.epoch);
+    BOOST_CHECK_EQUAL(-0.05, data.avg_log_prob);
+};
+
 BOOST_AUTO_TEST_CASE(Trainer_constructor)
 {
     Trainer trainer;
