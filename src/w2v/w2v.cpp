@@ -84,6 +84,19 @@ std::vector<int> get_context(const std::vector<int>& words, int index, int histo
     return ret;
 }
 
+void gradient_descent(std::vector<std::vector<double>>& out, const std::vector<std::vector<double>>& gradients, double lr)
+{
+    for (int i = 0;  i < out.size();  ++i)
+        for (int j = 0;  j < out[i].size();  ++j)
+            out[i][j] -= gradients[i][j] * lr;
+}
+
+CBOWModelGradients::CBOWModelGradients(int W, int D)
+    : P(W, std::vector<double>(D, 0.0))
+    , O(W, std::vector<double>(D, 0.0))
+{
+}
+
 CBOWModel::CBOWModel(int W, int D, int historyN, int futureN)
     : W(W)
     , D(D)
@@ -148,6 +161,19 @@ double CBOWModel::avg_log_prob(const std::vector<int>& words) const
         sum += std::log(p);
     }
     return sum / words.size();
+}
+
+CBOWModelGradients CBOWModel::gradients() const
+{
+    CBOWModelGradients ret(W, D);
+    // TODO!
+    return ret;
+}
+
+void CBOWModel::update(const CBOWModelGradients& gradients, double lr)
+{
+    gradient_descent(P, gradients.P, lr);
+    gradient_descent(O, gradients.O, lr);
 }
 
 SimpleReporter::SimpleReporter(std::ostream& os)
@@ -249,10 +275,9 @@ CBOWModel Trainer::train(const std::vector<int>& corpus) const
         (*initReporter)({e, avg_log_prob, lr});
     while (e <= epochs) {
         ++e;
-        // TODO: compute gradients of loss function w.r.t. P and O
-        // TODO: compute new learning rate
-        // TODO: update P and O weights based on gradients and learning rate
+        CBOWModelGradients gradients = model.gradients();
         lr = learningRate ? (*learningRate)(e) : 1.0;
+        model.update(gradients, lr);
         avg_log_prob = model.avg_log_prob(corpus);
         if (epochReporter)
             (*epochReporter)({e, avg_log_prob, lr});

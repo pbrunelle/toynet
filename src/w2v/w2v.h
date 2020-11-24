@@ -35,6 +35,16 @@ void add(std::vector<double>& to, const std::vector<double>& other);
 // close to the beginning or end of the corpus.
 std::vector<int> get_context(const std::vector<int>& words, int index, int historyN, int futureN);
 
+// Given two matrices `out` and `gradients` of the same dimensions, modify out such that:
+// out[i][j] -= gradients[i][j] * lr
+void gradient_descent(std::vector<std::vector<double>>& out, const std::vector<std::vector<double>>& gradients, double lr);
+
+struct CBOWModelGradients {
+    CBOWModelGradients(int W, int D);
+    std::vector<std::vector<double>> P;
+    std::vector<std::vector<double>> O;
+};
+
 // An implementation of the Continuous Bag-of-Words Model from
 // https://arxiv.org/abs/1301.3781.
 struct CBOWModel {
@@ -92,6 +102,12 @@ struct CBOWModel {
     // Pre-conditions:
     //   - For each `w` in `words`: 0 <= `w` < W
     double avg_log_prob(const std::vector<int>& words) const;
+
+    // Compute gradients of loss function w.r.t. P and O
+    CBOWModelGradients gradients() const;
+
+    // Given gradients and a learning rate, update the matrices P and O
+    void update(const CBOWModelGradients& gradients, double lr);
 
     friend class boost::serialization::access;
 

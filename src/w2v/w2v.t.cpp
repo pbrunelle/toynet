@@ -279,6 +279,25 @@ BOOST_AUTO_TEST_CASE(get_context_6)
     BOOST_CHECK_EQUAL(expected6, get_context(words, 9, 3, 3));
 }
 
+BOOST_AUTO_TEST_CASE(gradient_descent_2_by_2)
+{
+    std::vector<std::vector<double>> m(2, std::vector<double>(2));
+    m[0][0] = 2.0;
+    m[0][1] = 7.5;
+    m[1][0] = -3.0;
+    m[1][1] = -19.5;
+    std::vector<std::vector<double>> g(2, std::vector<double>(2));
+    g[0][0] = 3.0;
+    g[0][1] = -5.0;
+    g[1][0] = 9.0;
+    g[1][1] = -2.5;
+    gradient_descent(m, g, 0.5);
+    BOOST_CHECK_EQUAL(0.5, m[0][0]); // 2.0 - 3.0 * 0.5
+    BOOST_CHECK_EQUAL(10.0, m[0][1]); // 7.5 - (-5.0 * 0.5)
+    BOOST_CHECK_EQUAL(-7.5, m[1][0]); // -3.0 - (9.0 * 0.5)
+    BOOST_CHECK_EQUAL(-18.25, m[1][1]); // -19.5 - (-2.5 * 0.5)
+}
+
 BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W1_defaults)
 {
     CBOWModel model(1);
