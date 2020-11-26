@@ -3,11 +3,13 @@ find_package(Boost 1.73 REQUIRED serialization unit_test_framework)
 add_library(
     w2vlib
     w2v.cpp
+    diff.cpp
 )
 
 add_executable(
     w2v_unit_tests.tsk
     w2v.t.cpp
+    diff.t.cpp
 )
 
 target_include_directories(w2vlib PRIVATE . ${Boost_INCLUDE_DIRS})
