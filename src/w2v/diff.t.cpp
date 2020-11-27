@@ -54,7 +54,6 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
         BOOST_CHECK(network.loss <= prev_loss);
         prev_loss = network.loss;
     }
-
     // std::cout << network << std::endl;
     BOOST_CHECK(network.loss < 1e-6);
 
@@ -65,7 +64,24 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
         network.update_weights(0.01);
         // std::cout << i << " " << network.loss << std::endl;
     }
+    // std::cout << network << std::endl;
+    BOOST_CHECK(network.loss < 1e-6);
 
+    // Provide more than 1 example so the network can learn the proper function
+    const std::vector<std::vector<double>> x3{
+        { 4.0,  3.0},
+        { 3.0,  4.0},
+        {-1.0,  5.0},
+        { 9.8, -3.1},
+    };
+    for (int i = 0;  i < 60;  ++i) {
+        network.forward_backward(x3);
+        // NOTE: If x3 only contains {{ 4.0,  3.0}, { 3.0,  4.0}} and I set the
+        // learning rate to 0.1, the learning first converges but then diverges
+        // towards infinity
+        network.update_weights(0.01);
+        // std::cout << i << " " << network.loss << std::endl;
+    }
     // std::cout << network << std::endl;
     BOOST_CHECK(network.loss < 1e-6);
 }
