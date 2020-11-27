@@ -28,6 +28,22 @@ std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vect
 // pre-condition: to.size() == other.size()
 void add(std::vector<double>& to, const std::vector<double>& other);
 
+// element-wise addition
+void add(std::vector<std::vector<double>>& to, const std::vector<std::vector<double>>& other);
+
+// element-wise addition
+void add(std::vector<std::vector<std::vector<double>>>& to, const std::vector<std::vector<std::vector<double>>>& other);
+
+// divide each element by a constant
+// pre-condition: denom != 0.0
+void normalize(std::vector<double>& to, double denom);
+
+// divide each element by a constant
+void normalize(std::vector<std::vector<double>>& to, double denom);
+
+// divide each element by a constant
+void normalize(std::vector<std::vector<std::vector<double>>>& to, double denom);
+
 // Get the context around word `index` from a corpus `words`, using a maximum
 // of `historyN` words before `index` and `futureN` words after `index`.
 // The word at `index` is *not* part of the context.

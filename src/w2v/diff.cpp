@@ -62,63 +62,83 @@ DiffNumbers::DiffNumbers(int hidden, int width, int inputs)
     init_weights();
 }
 
-void DiffNumbers::forward_backward(const std::vector<double>& x)
+void DiffNumbers::forward_backward(const std::vector<std::vector<double>>& training_set)
 {
-    // ground truth: y = f(x) = x[0] - x[1] + x[2] - x[3] ...
-    double y = 0.0;
-    for (int i = 0;  i < x.size();  ++i)
-        y += (i % 2) ? -x[i] : x[i];
+    init_tensor(DW, hidden, width, inputs);
+    init_tensor(A, hidden, width, inputs);
+    init_tensor(G, hidden, width, inputs);
+    loss = 0.0;
 
-    // input layer
-    A[0] = x;
+    for (const auto & x : training_set) {
+        std::vector<std::vector<std::vector<double>>> exDW;
+        std::vector<std::vector<double>> exA;
+        std::vector<std::vector<double>> exG;
 
-    // forward: hidden layers and output layer
-    for (int i = 0;  i < hidden+1;  ++i) {
-        for (int j = 0;  j < A[i+1].size();  ++j)
-            A[i+1][j] = 0.0;
-        for (int j = 0;  j < W[i].size();  ++j) {
-            for (int k = 0;  k < W[i][j].size();  ++k) {
-                A[i+1][k] += A[i][j] * W[i][j][k];
-            }
+        init_tensor(exDW, hidden, width, inputs);
+        init_tensor(exA, hidden, width, inputs);
+        init_tensor(exG, hidden, width, inputs);
+
+        // ground truth: y = f(x) = x[0] - x[1] + x[2] - x[3] ...
+        double y = 0.0;
+        for (int i = 0;  i < x.size();  ++i)
+            y += (i % 2) ? -x[i] : x[i];
+    
+        // input layer
+        exA[0] = x;
+    
+        // forward: hidden layers and output layer
+        for (int i = 0;  i < hidden+1;  ++i)
+            for (int j = 0;  j < W[i].size();  ++j)
+                for (int k = 0;  k < W[i][j].size();  ++k)
+                    exA[i+1][k] += exA[i][j] * W[i][j][k];
+    
+        // forward: MSE loss
+        const double y_hat = exA[hidden+1][0];
+        const double diff = y - y_hat;
+        const double exloss = diff * diff;
+    
+        // backward: derivative of loss w.r.t. y_hat
+        // L(y_hat, y) = (y - y_hat)^2
+        //             = y^2 - 2*y*y_hat + y_hat^2
+        // d(L, y_hat) = -2*y + 2*y_hat
+        //             = -2 * diff
+        const double delta_loss_y_hat = -2.0 * diff;
+        exG[hidden+1][0] = delta_loss_y_hat;
+    
+        // backward: for each layer
+        for (int i = hidden;  i >= 0;  --i) {
+            const std::vector<double>& g = exG[i+1];
+    
+            // Convert the gradient into the pre-nonlinearity activation
+            // This is a no-op because all activations are linear
+    
+            // Compute gradients on weights, biases, and regularization terms
+            // Note: there are no bias nor regularization terms
+            // d(J, W(i)) = g * h(i-1)
+            for (int j = 0;  j < exA[i].size();  ++j)
+                for (int k = 0;  k < g.size();  ++k)
+                    exDW[i][j][k] = g[k] * exA[i][j];
+    
+            // Propagate the gradient w.r.t. the next lower-level hidden layer's
+            // activation
+            // g = d(J, h(i-1)) = W(i) * g
+            for (int j = 0;  j < exA[i].size();  ++j)
+                for (int k = 0;  k < g.size();  ++k)
+                    exG[i][j] += W[i][j][k] * g[k];
         }
+
+        // Add the matrices for example `x` to the overall matrices across all training examples
+        add(DW, exDW);
+        add(A, exA);
+        add(G, exG);
+        loss += exloss;
     }
 
-    // forward: MSE loss
-    const double y_hat = A[hidden+1][0];
-    const double diff = y - y_hat;
-    loss = diff * diff;
-
-    // backward: derivative of loss w.r.t. y_hat
-    // L(y_hat, y) = (y - y_hat)^2
-    //             = y^2 - 2*y*y_hat + y_hat^2
-    // d(L, y_hat) = -2*y + 2*y_hat
-    //             = -2 * diff
-    const double delta_loss_y_hat = -2.0 * diff;
-    G[hidden+1][0] = delta_loss_y_hat;
-
-    // backward: for each layer
-    for (int i = hidden;  i >= 0;  --i) {
-        const std::vector<double>& g = G[i+1];
-
-        // Convert the gradient into the pre-nonlinearity activation
-        // This is a no-op because all activations are linear
-
-        // Compute gradients on weights, biases, and regularization terms
-        // Note: there are no bias nor regularization terms
-        // d(J, W(i)) = g * h(i-1)
-        for (int j = 0;  j < A[i].size();  ++j)
-            for (int k = 0;  k < g.size();  ++k)
-                DW[i][j][k] = g[k] * A[i][j];
-
-        // Propagate the gradient w.r.t. the next lower-level hidden layer's
-        // activation
-        // g = d(J, h(i-1)) = W(i) * g
-        for (int j = 0;  j < A[i].size();  ++j) {
-            G[i][j] = 0.0;
-            for (int k = 0;  k < g.size();  ++k)
-                G[i][j] += W[i][j][k] * g[k];
-        }
-    }
+    // Compute averages
+    normalize(DW, training_set.size());
+    normalize(A, training_set.size());
+    normalize(G, training_set.size());
+    loss /= training_set.size();
 }
 
 void DiffNumbers::update_weights(double lr)

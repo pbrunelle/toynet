@@ -74,6 +74,36 @@ void add(std::vector<double>& to, const std::vector<double>& other)
         to[i] += other[i];
 }
 
+void add(std::vector<std::vector<double>>& to, const std::vector<std::vector<double>>& other)
+{
+    for (int i = 0;  i < to.size();  ++i)
+        add(to[i], other[i]);
+}
+
+void add(std::vector<std::vector<std::vector<double>>>& to, const std::vector<std::vector<std::vector<double>>>& other)
+{
+    for (int i = 0;  i < to.size();  ++i)
+        add(to[i], other[i]);
+}
+
+void normalize(std::vector<double>& to, double denom)
+{
+    for (auto& d : to)
+        d /= denom;
+}
+
+void normalize(std::vector<std::vector<double>>& to, double denom)
+{
+    for (auto& d : to)
+        normalize(d, denom);
+}
+
+void normalize(std::vector<std::vector<std::vector<double>>>& to, double denom)
+{
+    for (auto& d : to)
+        normalize(d, denom);
+}
+
 std::vector<int> get_context(const std::vector<int>& words, int index, int historyN, int futureN)
 {
     std::vector<int> ret;

@@ -19,7 +19,7 @@ struct DiffNumbers {
 
     void init_weights();
 
-    void forward_backward(const std::vector<double>& x);
+    void forward_backward(const std::vector<std::vector<double>>& training_set);
 
     void update_weights(double lr);
 

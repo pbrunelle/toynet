@@ -9,7 +9,7 @@ using namespace w2v;
 BOOST_AUTO_TEST_CASE(difference_numbers)
 {
     DiffNumbers network(1, 2, 2);
-    const std::vector<double> x{4.0, 3.0};
+    const std::vector<std::vector<double>> x{{4.0, 3.0}};
 
     BOOST_CHECK_EQUAL(
         "hidden 1 width 2 inputs 2 loss 0\n"
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
     BOOST_CHECK(network.loss < 1e-6);
 
     // Let's make sure this also works for x[1] > x[0]
-    const std::vector<double> x2{3.0, 4.0};
+    const std::vector<std::vector<double>> x2{{3.0, 4.0}};
     for (int i = 0;  i < 60;  ++i) {
         network.forward_backward(x2);
         network.update_weights(0.01);
