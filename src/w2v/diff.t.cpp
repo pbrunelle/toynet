@@ -3,6 +3,7 @@
 #include <stlio.h>
 #include <iostream>
 #include <boost/test/unit_test.hpp>
+#include <random>
 
 using namespace w2v;
 
@@ -58,6 +59,7 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
     BOOST_CHECK(network.loss < 1e-6);
 
     // Let's make sure this also works for x[1] > x[0]
+    network.init_weights();
     const std::vector<std::vector<double>> x2{{3.0, 4.0}};
     for (int i = 0;  i < 60;  ++i) {
         network.forward_backward(x2);
@@ -68,6 +70,7 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
     BOOST_CHECK(network.loss < 1e-6);
 
     // Provide more than 1 example so the network can learn the proper function
+    network.init_weights();
     const std::vector<std::vector<double>> x3{
         { 4.0,  3.0},
         { 3.0,  4.0},
@@ -76,11 +79,29 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
     };
     for (int i = 0;  i < 60;  ++i) {
         network.forward_backward(x3);
-        // NOTE: If x3 only contains {{ 4.0,  3.0}, { 3.0,  4.0}} and I set the
-        // learning rate to 0.1, the learning first converges but then diverges
-        // towards infinity
         network.update_weights(0.01);
         // std::cout << i << " " << network.loss << std::endl;
+    }
+    // std::cout << network << std::endl;
+    BOOST_CHECK(network.loss < 1e-6);
+
+    // Let's go for more examples!
+    network.init_weights();
+    std::random_device rd;
+    std::mt19937 e2(rd());
+    std::uniform_real_distribution<> dist(-20, 150);
+    std::vector<std::vector<double>> x4(1000, {0.0, 0.0});
+    for (auto & ex : x4) {
+        ex[0] = dist(e2);
+        ex[1] = dist(e2);
+    }
+    // std::cout << x4.front() << std::endl;
+    // std::cout << x4.back() << std::endl;
+    for (int i = 0;  i < 20;  ++i) {
+        network.forward_backward(x4);
+        // std::cout << i << " " << network.loss << std::endl;
+        // std::cout << network << std::endl;
+        network.update_weights(0.00005); // we need a small step size otherwise training doesn't converge
     }
     // std::cout << network << std::endl;
     BOOST_CHECK(network.loss < 1e-6);
