@@ -46,8 +46,15 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
 
     BOOST_CHECK_EQUAL(expected, network.print());
 
-    for (int i = 0;  i < 10;  ++i) {
+    double prev_loss = network.loss;
+    for (int i = 0;  i < 50;  ++i) {
         network.forward_backward(x);
-        network.update_weights(0.1);
+        network.update_weights(0.01);
+        // std::cout << i << " " << network.loss << std::endl;
+        BOOST_CHECK(network.loss <= prev_loss);
+        prev_loss = network.loss;
     }
+
+    // std::cout << network << std::endl;
+    BOOST_CHECK(network.loss < 1e-6);
 }
