@@ -113,10 +113,20 @@ void DiffNumbers::forward_backward(const std::vector<double>& x)
         // Propagate the gradient w.r.t. the next lower-level hidden layer's
         // activation
         // g = d(J, h(i-1)) = W(i) * g
-        for (int j = 0;  j < A[i].size();  ++j)
+        for (int j = 0;  j < A[i].size();  ++j) {
+            G[i][j] = 0.0;
             for (int k = 0;  k < g.size();  ++k)
                 G[i][j] += W[i][j][k] * g[k];
+        }
     }
+}
+
+void DiffNumbers::update_weights(double lr)
+{
+    for (int i = 0;  i < W.size();  ++i)
+        for (int j = 0;  j < W[i].size();  ++j)
+            for (int k = 0;  k < W[i][j].size();  ++k)
+                W[i][j][k] -= lr * DW[i][j][k];
 }
 
 std::string DiffNumbers::print() const

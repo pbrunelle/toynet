@@ -21,6 +21,8 @@ struct DiffNumbers {
 
     void forward_backward(const std::vector<double>& x);
 
+    void update_weights(double lr);
+
     std::string print() const;
 
     // The weights of the FFN
