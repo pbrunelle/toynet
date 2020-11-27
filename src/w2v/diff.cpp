@@ -19,7 +19,7 @@ void init_tensor(std::vector<std::vector<std::vector<double>>>&V, int hidden, in
     }
 }
 
-void init_tensor(std::vector<std::vector<double>>&V, int hidden, int width, int inputs)
+void init_tensor(std::vector<std::vector<double>>& V, int hidden, int width, int inputs)
 {
     V.resize(hidden + 2);  // 1 input layer, `hidden` hidden layers, 1 output layer
     // input layer
@@ -33,20 +33,10 @@ void DiffNumbers::init_weights()
 {
     const std::vector<double> pool{-0.2, -0.1, 0.0, 0.1, 0.2};
     int n = 0;
-    for (int i = 0;  i < W.size();  ++i) {
-        for (int j = 0;  j < W[i].size();  ++j) {
-            for (int k = 0;  k < W[i][j].size();  ++k) {
+    for (int i = 0;  i < W.size();  ++i)
+        for (int j = 0;  j < W[i].size();  ++j)
+            for (int k = 0;  k < W[i][j].size();  ++k)
                 W[i][j][k] = pool[n++ % pool.size()];
-                // DW[i][j][k] = pool[n++ % pool.size()];
-            }
-        }
-    }
-    for (int i = 0;  i < G.size();  ++i) {
-        for (int j = 0;  j < G[i].size();  ++j) {
-            // A[i][j] = pool[n++ % pool.size()];
-            // G[i][j] = pool[n++ % pool.size()];
-        }
-    }
 }
 
 DiffNumbers::DiffNumbers(int hidden, int width, int inputs)
