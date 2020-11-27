@@ -1,8 +1,10 @@
 #include <iostream>
 #include <vector>
-// #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 
 namespace w2v {
+
+using namespace boost::numeric::ublas;
 
 // Inmplementation of algorithms 6.3 and 6.4 (pp. 205-6) of the "Deep Learning"
 // book on a toy network.
@@ -29,10 +31,10 @@ struct DiffNumbers {
     // The weights of the FFN
     // W[layer][unit index of previous layer][unit index of layer]
     // Where layer = 0 is the layer closest to the input
-    std::vector<std::vector<std::vector<double>>> W;
+    std::vector<matrix<double>> W;
 
     // The gradients of the loss for a given example w.r.t. the weights
-    std::vector<std::vector<std::vector<double>>> DW;
+    std::vector<matrix<double>> DW;
 
     // The pre-activations (since everything is linear in our network,
     // there are no post-activations)

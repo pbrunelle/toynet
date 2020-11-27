@@ -2,8 +2,11 @@
 #include <vector>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 
 namespace w2v {
+
+using namespace boost::numeric::ublas;
 
 std::vector<double> softmax(const std::vector<double>& v);
 
@@ -32,7 +35,7 @@ void add(std::vector<double>& to, const std::vector<double>& other);
 void add(std::vector<std::vector<double>>& to, const std::vector<std::vector<double>>& other);
 
 // element-wise addition
-void add(std::vector<std::vector<std::vector<double>>>& to, const std::vector<std::vector<std::vector<double>>>& other);
+void add(std::vector<matrix<double>>& to, const std::vector<matrix<double>>& other);
 
 // divide each element by a constant
 // pre-condition: denom != 0.0
@@ -42,7 +45,7 @@ void normalize(std::vector<double>& to, double denom);
 void normalize(std::vector<std::vector<double>>& to, double denom);
 
 // divide each element by a constant
-void normalize(std::vector<std::vector<std::vector<double>>>& to, double denom);
+void normalize(std::vector<matrix<double>>& to, double denom);
 
 // Get the context around word `index` from a corpus `words`, using a maximum
 // of `historyN` words before `index` and `futureN` words after `index`.

@@ -5,17 +5,13 @@
 
 namespace w2v {
 
-void init_tensor(std::vector<std::vector<std::vector<double>>>&V, int hidden, int width, int inputs)
+void init_tensor(std::vector<matrix<double>>&V, int hidden, int width, int inputs)
 {
     V.resize(hidden + 1);
     for (int i = 0;  i < hidden + 1;  ++i) {
-        V[i].resize(i == 0 ? inputs : width);
-        for (int j = 0;  j < V[i].size();  ++j) {
-            V[i][j].resize(i == hidden ? 1 : width);
-            for (int k = 0;  k < V[i][j].size();  ++k) {
-                V[i][j][k] = 0.0;
-            }
-        }
+        int rows = (i == 0 ? inputs : width);
+        int cols = (i == hidden ? 1 : width);
+        V[i] = zero_matrix<double>(rows, cols);
     }
 }
 
@@ -34,9 +30,9 @@ void DiffNumbers::init_weights()
     const std::vector<double> pool{-0.2, -0.1, 0.0, 0.1, 0.2};
     int n = 0;
     for (int i = 0;  i < W.size();  ++i)
-        for (int j = 0;  j < W[i].size();  ++j)
-            for (int k = 0;  k < W[i][j].size();  ++k)
-                W[i][j][k] = pool[n++ % pool.size()];
+        for (int j = 0;  j < W[i].size1();  ++j)
+            for (int k = 0;  k < W[i].size2();  ++k)
+                W[i](j, k) = pool[n++ % pool.size()];
 }
 
 DiffNumbers::DiffNumbers(int hidden, int width, int inputs)
@@ -60,7 +56,7 @@ void DiffNumbers::forward_backward(const std::vector<std::vector<double>>& train
     loss = 0.0;
 
     for (const auto & x : training_set) {
-        std::vector<std::vector<std::vector<double>>> exDW;
+        std::vector<matrix<double>> exDW;
         std::vector<std::vector<double>> exA;
         std::vector<std::vector<double>> exG;
 
@@ -78,9 +74,9 @@ void DiffNumbers::forward_backward(const std::vector<std::vector<double>>& train
     
         // forward: hidden layers and output layer
         for (int i = 0;  i < hidden+1;  ++i)
-            for (int j = 0;  j < W[i].size();  ++j)
-                for (int k = 0;  k < W[i][j].size();  ++k)
-                    exA[i+1][k] += exA[i][j] * W[i][j][k];
+            for (int j = 0;  j < W[i].size1();  ++j)
+                for (int k = 0;  k < W[i].size2();  ++k)
+                    exA[i+1][k] += exA[i][j] * W[i](j, k);
     
         // forward: MSE loss
         const double y_hat = exA[hidden+1][0];
@@ -107,14 +103,14 @@ void DiffNumbers::forward_backward(const std::vector<std::vector<double>>& train
             // d(J, W(i)) = g * h(i-1)
             for (int j = 0;  j < exA[i].size();  ++j)
                 for (int k = 0;  k < g.size();  ++k)
-                    exDW[i][j][k] = g[k] * exA[i][j];
+                    exDW[i](j, k) = g[k] * exA[i][j];
     
             // Propagate the gradient w.r.t. the next lower-level hidden layer's
             // activation
             // g = d(J, h(i-1)) = W(i) * g
             for (int j = 0;  j < exA[i].size();  ++j)
                 for (int k = 0;  k < g.size();  ++k)
-                    exG[i][j] += W[i][j][k] * g[k];
+                    exG[i][j] += W[i](j, k) * g[k];
         }
 
         // Add the matrices for example `x` to the overall matrices across all training examples
@@ -134,9 +130,7 @@ void DiffNumbers::forward_backward(const std::vector<std::vector<double>>& train
 void DiffNumbers::update_weights(double lr)
 {
     for (int i = 0;  i < W.size();  ++i)
-        for (int j = 0;  j < W[i].size();  ++j)
-            for (int k = 0;  k < W[i][j].size();  ++k)
-                W[i][j][k] -= lr * DW[i][j][k];
+        W[i] -= lr * DW[i];
 }
 
 std::string DiffNumbers::print() const
