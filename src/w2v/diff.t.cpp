@@ -57,4 +57,15 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
 
     // std::cout << network << std::endl;
     BOOST_CHECK(network.loss < 1e-6);
+
+    // Let's make sure this also works for x[1] > x[0]
+    const std::vector<double> x2{3.0, 4.0};
+    for (int i = 0;  i < 60;  ++i) {
+        network.forward_backward(x2);
+        network.update_weights(0.01);
+        // std::cout << i << " " << network.loss << std::endl;
+    }
+
+    // std::cout << network << std::endl;
+    BOOST_CHECK(network.loss < 1e-6);
 }
