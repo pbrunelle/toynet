@@ -1,5 +1,7 @@
 find_package(Boost 1.73 REQUIRED serialization unit_test_framework)
 
+set(CMAKE_CXX_FLAGS "-g")
+
 add_library(
     w2vlib
     w2v.cpp
