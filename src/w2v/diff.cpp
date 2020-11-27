@@ -62,9 +62,13 @@ DiffNumbers::DiffNumbers(int hidden, int width, int inputs)
     init_weights();
 }
 
-void DiffNumbers::forward_backward(const std::vector<double>& x, double y)
+void DiffNumbers::forward_backward(const std::vector<double>& x)
 {
-    // for each hidden layer
+    // ground truth: y = f(x) = x[0] - x[1] + x[2] - x[3] ...
+    double y = 0.0;
+    for (int i = 0;  i < x.size();  ++i)
+        y += (i % 2) ? -x[i] : x[i];
+    // forward: hidden layers
     for (int i = 0;  i < hidden;  ++i) {
         const std::vector<double>& prev = (i == 0) ? x : A[i-1];
         for (int j = 0;  j < A.size();  ++j)
@@ -75,16 +79,16 @@ void DiffNumbers::forward_backward(const std::vector<double>& x, double y)
             }
         }
     }
-    // output (aka y_hat)
-    double& out = A.back().back();
-    out = 0.0;
+    // forward: output (y_hat)
+    double& y_hat = A.back().back();
+    y_hat = 0.0;
     const std::vector<double>& prev = (hidden == 0) ? x : A[hidden-1];
-    for (int i = 0;  i < W.back().size();  ++i) {
-        out += W.back()[i].back() * prev[i];
-    }
-    // loss
-    double diff = y - out;
+    for (int i = 0;  i < W.back().size();  ++i)
+        y_hat += W.back()[i].back() * prev[i];
+    // forward: MSE loss
+    double diff = y - y_hat;
     loss = diff * diff;
+    // backward: G and DW 
 }
 
 std::ostream& operator<<(std::ostream& os, const DiffNumbers& obj)

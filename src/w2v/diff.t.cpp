@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
         BOOST_CHECK_EQUAL(expected, ss.str());
     }
 
-    network.forward_backward({4.0, 3.0}, 1.0);
+    network.forward_backward({4.0, 3.0});
 
     {
         std::stringstream ss;

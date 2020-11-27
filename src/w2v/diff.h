@@ -3,17 +3,20 @@
 
 namespace w2v {
 
-// Implement algorithms 6.3 and 6.4 of the "Deep Learning" book
-// Our toy network has 2 inputs, a and b
-// The goal is to learn the function f(x) = x[0] - x[1] + x[2] - x[3] ...
-// We use MSE as our loss function
-// We implement a fully connected FFN
+// Inmplementation of algorithms 6.3 and 6.4 of the "Deep Learning" book on a
+// toy network.
+//
+// Our toy network has `inputs` input units.
+// The goal is to learn f(x) = x[0] - x[1] + x[2] - x[3] ...
+// We use MSE as our loss function.
+// We implement a fully connected FFN.  There are `hidden` hidden layers,
+// each of which has `width` units; `hidden` can be 0.
 struct DiffNumbers {
     DiffNumbers(int hidden, int width, int inputs);
 
     void init_weights();
 
-    void forward_backward(const std::vector<double>& x, double y);
+    void forward_backward(const std::vector<double>& x);
 
     // The weights of the FFN
     // W[layer][unit index of previous layer][unit index of layer]
