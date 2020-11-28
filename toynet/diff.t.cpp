@@ -1,6 +1,7 @@
 #include <diff.h>
 #include <w2v.h>
 #include <stlio.h>
+#include <ublasio.h>
 #include <iostream>
 #include <boost/test/unit_test.hpp>
 #include <random>
