@@ -17,6 +17,15 @@ std::ostream& operator<<(std::ostream& os, const matrix<T>& obj)
     return os << m;
 }
 
+template<class T>
+std::ostream& operator<<(std::ostream& os, const vector<T>& obj)
+{
+    std::vector<T> m(obj.size());
+    for (int i = 0;  i < obj.size();  ++i)
+        m[i] = obj(i);
+    return os << m;
+}
+
 } // namespace ublas
 } // namespace numeric
 } // namespace boost

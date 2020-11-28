@@ -8,7 +8,7 @@
 using namespace toynet;
 
 template<class T, class U>
-void check_close_vectors(const std::vector<T>& expected, const std::vector<U>& got, double tol=0.000001)
+void check_close_vectors(const T& expected, const U& got, double tol=0.000001)
 {
     BOOST_REQUIRE_EQUAL(expected.size(), got.size());
     for (int i = 0;  i < expected.size();  ++i) {
@@ -19,90 +19,90 @@ void check_close_vectors(const std::vector<T>& expected, const std::vector<U>& g
 BOOST_AUTO_TEST_CASE(softmax_numerical_stability)
 {
     // https://ogunlao.github.io/2020/04/26/you_dont_really_know_softmax.html#numerical-stability-of-softmax
-    const std::vector<double> v{10, 2, 10000, 4};
-    const std::vector<double> expected{0, 0, 1, 0};
-    const std::vector<double> got = softmax(v);
+    const ublas::vector<double> v = convert({10, 2, 10000, 4});
+    const ublas::vector<double> expected = convert({0, 0, 1, 0});
+    const ublas::vector<double> got = softmax(v);
     check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(naive_softmax_size_0)
 {
-    const std::vector<double> v{};
-    const std::vector<double> expected{};
-    const std::vector<double> got = naive_softmax(v);
-    BOOST_CHECK_EQUAL(expected, got);
+    const ublas::vector<double> v;
+    const ublas::vector<double> expected;
+    const ublas::vector<double> got = naive_softmax(v);
+    check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(naive_softmax_size_1)
 {
-    const std::vector<double> v{5.0};
-    const std::vector<double> expected{1.0};
-    const std::vector<double> got = naive_softmax(v);
-    BOOST_CHECK_EQUAL(expected, got);
+    const ublas::vector<double> v = convert({5.0});
+    const ublas::vector<double> expected = convert({1.0});
+    const ublas::vector<double> got = naive_softmax(v);
+    check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(naive_softmax_size_1_sum_0)
 {
     // Make sure we don't divide by 0!
-    const std::vector<double> v{0.0};
-    const std::vector<double> expected{1.0};
-    const std::vector<double> got = naive_softmax(v);
-    BOOST_CHECK_EQUAL(expected, got);
+    const ublas::vector<double> v = convert({0.0});
+    const ublas::vector<double> expected = convert({1.0});
+    const ublas::vector<double> got = naive_softmax(v);
+    check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(naive_softmax_size_2)
 {
-    const std::vector<double> v{1.0, 2.0};
-    const std::vector<double> expected{0.26894142, 0.73105858};  // numpy 1.15.4
-    const std::vector<double> got = naive_softmax(v);
+    const ublas::vector<double> v = convert({1.0, 2.0});
+    const ublas::vector<double> expected = convert({0.26894142, 0.73105858});  // numpy 1.15.4
+    const ublas::vector<double> got = naive_softmax(v);
     check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(stable_softmax_size_0)
 {
-    const std::vector<double> v{};
-    const std::vector<double> expected{};
-    const std::vector<double> got = stable_softmax(v);
-    BOOST_CHECK_EQUAL(expected, got);
+    const ublas::vector<double> v;
+    const ublas::vector<double> expected;
+    const ublas::vector<double> got = stable_softmax(v);
+    check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(stable_softmax_size_1)
 {
-    const std::vector<double> v{5.0};
-    const std::vector<double> expected{1.0};
-    const std::vector<double> got = stable_softmax(v);
-    BOOST_CHECK_EQUAL(expected, got);
+    const ublas::vector<double> v = convert({5.0});
+    const ublas::vector<double> expected = convert({1.0});
+    const ublas::vector<double> got = stable_softmax(v);
+    check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(stable_softmax_size_1_sum_0)
 {
     // Make sure we don't divide by 0!
-    const std::vector<double> v{0.0};
-    const std::vector<double> expected{1.0};
-    const std::vector<double> got = stable_softmax(v);
-    BOOST_CHECK_EQUAL(expected, got);
+    const ublas::vector<double> v = convert({0.0});
+    const ublas::vector<double> expected = convert({1.0});
+    const ublas::vector<double> got = stable_softmax(v);
+    check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(stable_softmax_size_2)
 {
-    const std::vector<double> v{1.0, 2.0};
-    const std::vector<double> expected{0.26894142, 0.73105858};  // numpy 1.15.4
-    const std::vector<double> got = stable_softmax(v);
+    const ublas::vector<double> v = convert({1.0, 2.0});
+    const ublas::vector<double> expected = convert({0.26894142, 0.73105858});  // numpy 1.15.4
+    const ublas::vector<double> got = stable_softmax(v);
     check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(stable_softmax_numerical_stability)
 {
     // https://ogunlao.github.io/2020/04/26/you_dont_really_know_softmax.html#numerical-stability-of-softmax
-    const std::vector<double> v{10, 2, 10000, 4};
-    const std::vector<double> expected{0, 0, 1, 0};
-    const std::vector<double> got = stable_softmax(v);
+    const ublas::vector<double> v = convert({10, 2, 10000, 4});
+    const ublas::vector<double> expected = convert({0, 0, 1, 0});
+    const ublas::vector<double> got = stable_softmax(v);
     check_close_vectors(expected, got);
 }
 
 BOOST_AUTO_TEST_CASE(magnitude_size_0)
 {
-    const std::vector<double> v{};
+    const ublas::vector<double> v;
     const double expected = 0.0;
     const double got = magnitude(v);
     BOOST_CHECK_CLOSE(expected, got, 0.000001);
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(magnitude_size_0)
 
 BOOST_AUTO_TEST_CASE(magnitude_size_1)
 {
-    const std::vector<double> v{6};
+    const ublas::vector<double> v = convert({6});
     const double expected = 6;
     const double got = magnitude(v);
     BOOST_CHECK_CLOSE(expected, got, 0.000001);
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(magnitude_size_1)
 
 BOOST_AUTO_TEST_CASE(magnitude_size_2)
 {
-    const std::vector<double> v{4, 3};
+    const ublas::vector<double> v = convert({4, 3});
     const double expected = 5;
     const double got = magnitude(v);
     BOOST_CHECK_CLOSE(expected, got, 0.000001);
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(magnitude_size_2)
 
 BOOST_AUTO_TEST_CASE(dot_product_size_0)
 {
-    const std::vector<double> v1{};
-    const std::vector<double> v2{};
+    const ublas::vector<double> v1;
+    const ublas::vector<double> v2;
     const double expected = 0.0;
     const double got = dot_product(v1, v2);
     BOOST_CHECK_EQUAL(expected, got);
@@ -135,8 +135,8 @@ BOOST_AUTO_TEST_CASE(dot_product_size_0)
 
 BOOST_AUTO_TEST_CASE(dot_product_size_1)
 {
-    const std::vector<double> v1{1.5};
-    const std::vector<double> v2{-2.0};
+    const ublas::vector<double> v1 = convert({1.5});
+    const ublas::vector<double> v2 = convert({-2.0});
     const double expected = -3.0;
     const double got = dot_product(v1, v2);
     BOOST_CHECK_EQUAL(expected, got);
@@ -144,8 +144,8 @@ BOOST_AUTO_TEST_CASE(dot_product_size_1)
 
 BOOST_AUTO_TEST_CASE(dot_product_size_2)
 {
-    const std::vector<double> v1{1.5, 10};
-    const std::vector<double> v2{-2.0, 0.25};
+    const ublas::vector<double> v1 = convert({1.5, 10});
+    const ublas::vector<double> v2 = convert({-2.0, 0.25});
     const double expected = -0.5;
     const double got = dot_product(v1, v2);
     BOOST_CHECK_EQUAL(expected, got);
@@ -154,8 +154,8 @@ BOOST_AUTO_TEST_CASE(dot_product_size_2)
 BOOST_AUTO_TEST_CASE(cosine_distance_a)
 {
     // https://stackoverflow.com/a/1750187
-    const std::vector<double> v1{2, 0, 1, 1, 0, 2, 1, 1};
-    const std::vector<double> v2{2, 1, 1, 0, 1, 1, 1, 1};
+    const ublas::vector<double> v1 = convert({2, 0, 1, 1, 0, 2, 1, 1});
+    const ublas::vector<double> v2 = convert({2, 1, 1, 0, 1, 1, 1, 1});
     const double expected = 0.822;
     const double got12 = cosine_distance(v1, v2);
     const double got21 = cosine_distance(v2, v1);
@@ -170,8 +170,8 @@ BOOST_AUTO_TEST_CASE(cosine_distance_a)
 BOOST_AUTO_TEST_CASE(cosine_distance_b)
 {
     // https://stackoverflow.com/a/14038820
-    const std::vector<double> v1{-1, -1, 0};
-    const std::vector<double> v2{-1, 0, -1};
+    const ublas::vector<double> v1 = convert({-1, -1, 0});
+    const ublas::vector<double> v2 = convert({-1, 0, -1});
     const double expected = 0.5;
     const double got12 = cosine_distance(v1, v2);
     const double got21 = cosine_distance(v2, v1);
@@ -185,8 +185,8 @@ BOOST_AUTO_TEST_CASE(cosine_distance_b)
 
 BOOST_AUTO_TEST_CASE(nearest_neighbors_size_0)
 {
-    const std::vector<double> v{-1, -1, 0};
-    const std::vector<std::vector<double>> points{};
+    const ublas::vector<double> v = convert({-1, -1, 0});
+    const std::vector<ublas::vector<double>> points{};
     const std::vector<int> expected{};
     const std::vector<int> got = nearest_neighbors(v, points);
     BOOST_CHECK_EQUAL(expected, got);
@@ -194,8 +194,8 @@ BOOST_AUTO_TEST_CASE(nearest_neighbors_size_0)
 
 BOOST_AUTO_TEST_CASE(nearest_neighbors_size_1_equal)
 {
-    const std::vector<double> v{-1, -1, 0};
-    const std::vector<std::vector<double>> points{{-1, -1, 0}};
+    const ublas::vector<double> v = convert({-1, -1, 0});
+    const std::vector<ublas::vector<double>> points{convert({-1, -1, 0})};
     const std::vector<int> expected{0};
     const std::vector<int> got = nearest_neighbors(v, points);
     BOOST_CHECK_EQUAL(expected, got);
@@ -203,8 +203,8 @@ BOOST_AUTO_TEST_CASE(nearest_neighbors_size_1_equal)
 
 BOOST_AUTO_TEST_CASE(nearest_neighbors_size_1_not_equal)
 {
-    const std::vector<double> v{-1, -1, 0};
-    const std::vector<std::vector<double>> points{{-1, 0, -1}};
+    const ublas::vector<double> v = convert({-1, -1, 0});
+    const std::vector<ublas::vector<double>> points{convert({-1, 0, -1})};
     const std::vector<int> expected{0};
     const std::vector<int> got = nearest_neighbors(v, points);
     BOOST_CHECK_EQUAL(expected, got);
@@ -212,10 +212,10 @@ BOOST_AUTO_TEST_CASE(nearest_neighbors_size_1_not_equal)
 
 BOOST_AUTO_TEST_CASE(nearest_neighbors_size_2)
 {
-    const std::vector<double> v{-1, -1, 0};
-    const std::vector<std::vector<double>> points{
-        {-1, 0, -1},
-        {-1, -1, 0}
+    const ublas::vector<double> v = convert({-1, -1, 0});
+    const std::vector<ublas::vector<double>> points{
+        convert({-1, 0, -1}),
+        convert({-1, -1, 0})
     };
     const std::vector<int> expected{1, 0};
     const std::vector<int> got = nearest_neighbors(v, points);
@@ -224,43 +224,16 @@ BOOST_AUTO_TEST_CASE(nearest_neighbors_size_2)
 
 BOOST_AUTO_TEST_CASE(nearest_neighbors_size_4)
 {
-    const std::vector<double> v{-1, -1, 0};
-    const std::vector<std::vector<double>> points{
-        {-2, -1, 0},
-        {-1, 0, -1},
-        {-1, -1, 0},
-        {-3, -1, 0}
+    const ublas::vector<double> v = convert({-1, -1, 0});
+    const std::vector<ublas::vector<double>> points{
+        convert({-2, -1, 0}),
+        convert({-1, 0, -1}),
+        convert({-1, -1, 0}),
+        convert({-3, -1, 0})
     };
     const std::vector<int> expected{2, 0, 3, 1};
     const std::vector<int> got = nearest_neighbors(v, points);
     BOOST_CHECK_EQUAL(expected, got);
-}
-
-BOOST_AUTO_TEST_CASE(add_size_0)
-{
-    std::vector<double> to{};
-    const std::vector<double> other{};
-    const std::vector<double> expected{};
-    add(to, other);
-    BOOST_CHECK_EQUAL(expected, to);
-}
-
-BOOST_AUTO_TEST_CASE(add_size_1)
-{
-    std::vector<double> to{1.5};
-    const std::vector<double> other{-2.5};
-    const std::vector<double> expected{-1.0};
-    add(to, other);
-    BOOST_CHECK_EQUAL(expected, to);
-}
-
-BOOST_AUTO_TEST_CASE(add_size_2)
-{
-    std::vector<double> to{1.5, 0.25};
-    const std::vector<double> other{-2.5, 0.75};
-    const std::vector<double> expected{-1.0, 1.0};
-    add(to, other);
-    BOOST_CHECK_EQUAL(expected, to);
 }
 
 BOOST_AUTO_TEST_CASE(get_context_6)
@@ -282,21 +255,21 @@ BOOST_AUTO_TEST_CASE(get_context_6)
 
 BOOST_AUTO_TEST_CASE(gradient_descent_2_by_2)
 {
-    std::vector<std::vector<double>> m(2, std::vector<double>(2));
-    m[0][0] = 2.0;
-    m[0][1] = 7.5;
-    m[1][0] = -3.0;
-    m[1][1] = -19.5;
-    std::vector<std::vector<double>> g(2, std::vector<double>(2));
-    g[0][0] = 3.0;
-    g[0][1] = -5.0;
-    g[1][0] = 9.0;
-    g[1][1] = -2.5;
+    ublas::matrix<double> m(2, 2);
+    m(0, 0) = 2.0;
+    m(0, 1) = 7.5;
+    m(1, 0) = -3.0;
+    m(1, 1) = -19.5;
+    ublas::matrix<double> g(2, 2);
+    g(0, 0) = 3.0;
+    g(0, 1) = -5.0;
+    g(1, 0) = 9.0;
+    g(1, 1) = -2.5;
     gradient_descent(m, g, 0.5);
-    BOOST_CHECK_EQUAL(0.5, m[0][0]); // 2.0 - 3.0 * 0.5
-    BOOST_CHECK_EQUAL(10.0, m[0][1]); // 7.5 - (-5.0 * 0.5)
-    BOOST_CHECK_EQUAL(-7.5, m[1][0]); // -3.0 - (9.0 * 0.5)
-    BOOST_CHECK_EQUAL(-18.25, m[1][1]); // -19.5 - (-2.5 * 0.5)
+    BOOST_CHECK_EQUAL(0.5, m(0, 0)); // 2.0 - 3.0 * 0.5
+    BOOST_CHECK_EQUAL(10.0, m(0, 1)); // 7.5 - (-5.0 * 0.5)
+    BOOST_CHECK_EQUAL(-7.5, m(1, 0)); // -3.0 - (9.0 * 0.5)
+    BOOST_CHECK_EQUAL(-18.25, m(1, 1)); // -19.5 - (-2.5 * 0.5)
 }
 
 BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W1_defaults)
@@ -306,8 +279,8 @@ BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W1_defaults)
     BOOST_CHECK_EQUAL(50, model.D);
     BOOST_CHECK_EQUAL(4, model.historyN);
     BOOST_CHECK_EQUAL(4, model.futureN);
-    BOOST_CHECK_EQUAL(1, model.P.size());
-    BOOST_CHECK_EQUAL(50, model.P[0].size());
+    BOOST_CHECK_EQUAL(1, model.P.size1());
+    BOOST_CHECK_EQUAL(50, model.P.size2());
 }
 
 BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W2_defaults)
@@ -317,9 +290,8 @@ BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W2_defaults)
     BOOST_CHECK_EQUAL(50, model.D);
     BOOST_CHECK_EQUAL(4, model.historyN);
     BOOST_CHECK_EQUAL(4, model.futureN);
-    BOOST_CHECK_EQUAL(2, model.P.size());
-    BOOST_CHECK_EQUAL(50, model.P[0].size());
-    BOOST_CHECK_EQUAL(50, model.P[1].size());
+    BOOST_CHECK_EQUAL(2, model.P.size1());
+    BOOST_CHECK_EQUAL(50, model.P.size2());
 }
 
 BOOST_AUTO_TEST_CASE(CBOWModel_constructor_no_defaults)
@@ -329,8 +301,8 @@ BOOST_AUTO_TEST_CASE(CBOWModel_constructor_no_defaults)
     BOOST_CHECK_EQUAL(4, model.D);
     BOOST_CHECK_EQUAL(5, model.historyN);
     BOOST_CHECK_EQUAL(6, model.futureN);
-    BOOST_CHECK_EQUAL(3, model.P.size());
-    BOOST_CHECK_EQUAL(4, model.P[0].size());
+    BOOST_CHECK_EQUAL(3, model.P.size1());
+    BOOST_CHECK_EQUAL(4, model.P.size2());
 }
 
 BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W_1000000_D_100)
@@ -341,11 +313,10 @@ BOOST_AUTO_TEST_CASE(CBOWModel_constructor_W_1000000_D_100)
     BOOST_CHECK_EQUAL(100, model.D);
     BOOST_CHECK_EQUAL(4, model.historyN);
     BOOST_CHECK_EQUAL(4, model.futureN);
-    BOOST_CHECK_EQUAL(1000000, model.P.size());
-    BOOST_CHECK_EQUAL(100, model.P[0].size());
-    BOOST_CHECK_EQUAL(100, model.P[1000000-1].size());
-    BOOST_CHECK_EQUAL(100, model.O[0].size());
-    BOOST_CHECK_EQUAL(100, model.O[1000000-1].size());
+    BOOST_CHECK_EQUAL(1000000, model.P.size1());
+    BOOST_CHECK_EQUAL(100, model.P.size2());
+    BOOST_CHECK_EQUAL(1000000, model.O.size1());
+    BOOST_CHECK_EQUAL(100, model.O.size2());
 }
 
 BOOST_AUTO_TEST_CASE(CBOWModel_save_load)
@@ -359,27 +330,56 @@ BOOST_AUTO_TEST_CASE(CBOWModel_save_load)
     BOOST_CHECK_EQUAL(4, model2.D);
     BOOST_CHECK_EQUAL(5, model2.historyN);
     BOOST_CHECK_EQUAL(6, model2.futureN);
-    BOOST_CHECK_EQUAL(3, model2.P.size());
-    BOOST_CHECK_EQUAL(4, model2.P[0].size());
-    BOOST_CHECK_EQUAL(3, model2.O.size());
-    BOOST_CHECK_EQUAL(4, model2.O[0].size());
+    BOOST_CHECK_EQUAL(3, model2.P.size1());
+    BOOST_CHECK_EQUAL(4, model2.P.size2());
+    BOOST_CHECK_EQUAL(3, model2.O.size1());
+    BOOST_CHECK_EQUAL(4, model2.O.size2());
+}
+
+CBOWModel get_model()
+{
+    CBOWModel model(4, 3, 2, 2);
+
+    // {0.19,  0.11, -0.14}
+    model.P(0, 0) = 0.19;
+    model.P(0, 1) = 0.11;
+    model.P(0, 2) = -0.14;
+    // {0.04,  0.30, -0.20}
+    model.P(1, 0) = 0.04;
+    model.P(1, 1) = 0.30;
+    model.P(1, 2) = -0.20;
+    // {0.77, -0.03,  0.11}
+    model.P(2, 0) = 0.77;
+    model.P(2, 1) = -0.03;
+    model.P(2, 2) = 0.11;
+    // {0.33, -0.43,  0.81}
+    model.P(3, 0) = 0.33;
+    model.P(3, 1) = -0.43;
+    model.P(3, 2) = 0.81;
+
+    // {0.42, -0.28,  0.19}
+    model.O(0, 0) = 0.42;
+    model.O(0, 1) = -0.28;
+    model.O(0, 2) = 0.19;
+    // {0.77, -0.93,  0.11}
+    model.O(1, 0) = 0.77;
+    model.O(1, 1) = -0.93;
+    model.O(1, 2) = 0.11;
+    // {0.33, -0.43, -0.81}
+    model.O(2, 0) = 0.33;
+    model.O(2, 1) = -0.43;
+    model.O(2, 2) = -0.81;
+    // {0.94,  0.90, -0.20}
+    model.O(3, 0) = 0.94;
+    model.O(3, 1) = 0.90;
+    model.O(3, 2) = -0.20;
+
+    return model;
 }
 
 BOOST_AUTO_TEST_CASE(CBOWModel_predict_context_1)
 {
-    CBOWModel model(4, 3, 2, 2);
-    model.P = {
-        {0.19,  0.11, -0.14},
-        {0.04,  0.30, -0.20},
-        {0.77, -0.03,  0.11},
-        {0.33, -0.43,  0.81},
-    };
-    model.O = {
-        {0.42, -0.28,  0.19},
-        {0.77, -0.93,  0.11},
-        {0.33, -0.43, -0.81},
-        {0.94,  0.90, -0.20},
-    };
+    CBOWModel model = get_model();
     std::vector<std::pair<double, int>> prediction = model.predict({1});
     BOOST_CHECK_EQUAL(4, prediction.size());
     double sum = 0;
@@ -410,19 +410,7 @@ BOOST_AUTO_TEST_CASE(CBOWModel_predict_context_1)
 
 BOOST_AUTO_TEST_CASE(CBOWModel_predict_context_3)
 {
-    CBOWModel model(4, 3, 2, 2);
-    model.P = {
-        {0.19,  0.11, -0.14},
-        {0.04,  0.30, -0.20},
-        {0.77, -0.03,  0.11},
-        {0.33, -0.43,  0.81},
-    };
-    model.O = {
-        {0.42, -0.28,  0.19},
-        {0.77, -0.93,  0.11},
-        {0.33, -0.43, -0.81},
-        {0.94,  0.90, -0.20},
-    };
+    CBOWModel model = get_model();
     std::vector<std::pair<double, int>> prediction = model.predict({1, 1, 0});
     BOOST_CHECK_EQUAL(4, prediction.size());
     double sum = 0;
@@ -453,19 +441,7 @@ BOOST_AUTO_TEST_CASE(CBOWModel_predict_context_3)
 
 BOOST_AUTO_TEST_CASE(CBOWModel_avg_log_prob)
 {
-    CBOWModel model(4, 3, 2, 2);
-    model.P = {
-        {0.19,  0.11, -0.14},
-        {0.04,  0.30, -0.20},
-        {0.77, -0.03,  0.11},
-        {0.33, -0.43,  0.81},
-    };
-    model.O = {
-        {0.42, -0.28,  0.19},
-        {0.77, -0.93,  0.11},
-        {0.33, -0.43, -0.81},
-        {0.94,  0.90, -0.20},
-    };
+    CBOWModel model = get_model();
     const std::vector<int> words{0, 2, 0, 1, 1, 2, 0};
     const double log_p = model.avg_log_prob(words);
     BOOST_CHECK(log_p <= 0.0);
@@ -576,10 +552,10 @@ BOOST_AUTO_TEST_CASE(Trainer_train)
     BOOST_CHECK_EQUAL(2, model.D);
     BOOST_CHECK_EQUAL(1, model.historyN);
     BOOST_CHECK_EQUAL(1, model.futureN);
-    BOOST_CHECK_EQUAL(2, model.P.size());
-    BOOST_CHECK_EQUAL(2, model.P[0].size());
-    BOOST_CHECK_EQUAL(2, model.O.size());
-    BOOST_CHECK_EQUAL(2, model.O[0].size());
+    BOOST_CHECK_EQUAL(2, model.P.size1());
+    BOOST_CHECK_EQUAL(2, model.P.size2());
+    BOOST_CHECK_EQUAL(2, model.O.size1());
+    BOOST_CHECK_EQUAL(2, model.O.size2());
     // std::cout << ss.str() << std::endl;
     // BOOST_CHECK_EQUAL(std::string(""), ss.str());
 }

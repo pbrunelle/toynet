@@ -4,48 +4,51 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
+// https://stackoverflow.com/a/1211402
+namespace ublas = boost::numeric::ublas;
+
 namespace toynet {
 
-using namespace boost::numeric::ublas;
+inline ublas::vector<double> convert(const std::vector<double>& v)
+{
+    ublas::vector<double> ret(v.size());
+    for (int i = 0;  i < v.size();  ++i)
+        ret(i) = v[i];
+    return ret;
+}
 
-std::vector<double> softmax(const std::vector<double>& v);
+ublas::vector<double> softmax(const ublas::vector<double>& v);
 
-std::vector<double> naive_softmax(const std::vector<double>& v);
+ublas::vector<double> naive_softmax(const ublas::vector<double>& v);
 
-std::vector<double> stable_softmax(const std::vector<double>& v);
+ublas::vector<double> stable_softmax(const ublas::vector<double>& v);
 
-double magnitude(const std::vector<double>& v);
+double magnitude(const ublas::vector<double>& v);
 
 // pre-condition: v1.size() == v2.size()
-double dot_product(const std::vector<double>& v1, const std::vector<double>& v2);
+double dot_product(const ublas::vector<double>& v1, const ublas::vector<double>& v2);
 
 // pre-condition: v1.size() == v2.size()
 // pre-condition: ||v1|| != 0 && ||v2|| != 0
-double cosine_distance(const std::vector<double>& v1, const std::vector<double>& v2);
+double cosine_distance(const ublas::vector<double>& v1, const ublas::vector<double>& v2);
 
 // pre-condition: ||v|| != 0
 // pre-condition: for each p in points: p.size() == v.size() && ||p|| != 0
-std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vector<std::vector<double>>& points);
+std::vector<int> nearest_neighbors(const ublas::vector<double>& v, const std::vector<ublas::vector<double>>& points);
 
 // element-wise addition
 // pre-condition: to.size() == other.size()
-void add(std::vector<double>& to, const std::vector<double>& other);
+void add(std::vector<ublas::vector<double>>& to, const std::vector<ublas::vector<double>>& other);
 
 // element-wise addition
-void add(std::vector<std::vector<double>>& to, const std::vector<std::vector<double>>& other);
-
-// element-wise addition
-void add(std::vector<matrix<double>>& to, const std::vector<matrix<double>>& other);
+void add(std::vector<ublas::matrix<double>>& to, const std::vector<ublas::matrix<double>>& other);
 
 // divide each element by a constant
 // pre-condition: denom != 0.0
-void normalize(std::vector<double>& to, double denom);
+void normalize(std::vector<ublas::vector<double>>& to, double denom);
 
 // divide each element by a constant
-void normalize(std::vector<std::vector<double>>& to, double denom);
-
-// divide each element by a constant
-void normalize(std::vector<matrix<double>>& to, double denom);
+void normalize(std::vector<ublas::matrix<double>>& to, double denom);
 
 // Get the context around word `index` from a corpus `words`, using a maximum
 // of `historyN` words before `index` and `futureN` words after `index`.
@@ -56,12 +59,12 @@ std::vector<int> get_context(const std::vector<int>& words, int index, int histo
 
 // Given two matrices `out` and `gradients` of the same dimensions, modify out such that:
 // out[i][j] -= gradients[i][j] * lr
-void gradient_descent(std::vector<std::vector<double>>& out, const std::vector<std::vector<double>>& gradients, double lr);
+void gradient_descent(ublas::matrix<double>& out, const ublas::matrix<double>& gradients, double lr);
 
 struct CBOWModelGradients {
     CBOWModelGradients(int W, int D);
-    std::vector<std::vector<double>> P;
-    std::vector<std::vector<double>> O;
+    ublas::matrix<double> P;
+    ublas::matrix<double> O;
 };
 
 // An implementation of the Continuous Bag-of-Words Model from
@@ -110,7 +113,7 @@ struct CBOWModel {
     double predict(const std::vector<int>& context, int word) const;
 
     // Helper function for `predict` methods above
-    std::vector<double> predict_helper(const std::vector<int>& context) const;
+    ublas::vector<double> predict_helper(const std::vector<int>& context) const;
 
     // Given a corpus `words`, compute the average log probability, as defined
     // in https://arxiv.org/abs/1310.4546:
@@ -148,11 +151,11 @@ struct CBOWModel {
     // The matrix between the input layer and the projection layer
     // P[word_index][projection_layer_index]
     // (i.e. the words embeddings)
-    std::vector<std::vector<double>> P;
+    ublas::matrix<double> P;
     // The matrix between the projection layer and the output layer
     // P[word_index][projection_layer_index]
     // (i.e. used to predict most likely words)
-    std::vector<std::vector<double>> O;
+    ublas::matrix<double> O;
 };
 
 struct ReportData {

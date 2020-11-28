@@ -16,12 +16,12 @@ make && ./unit_tests.tsk
 
 These are the main classes I want to implement, their meaning, and their relationships:
 
-- `Loss`: a loss function
 - `Activation`: an activation function
 - `Layer`: a transformation on the post-activation output of the previous layer (or on the input for the first layer), and an optional activation function.
 - `Workspace`: used for training, contains activations and gradients
 - `Network`: contains layers, can perform inference (forward pass) and provide gradients
 - `Optimizer`: given gradients and weights, updates weights (i.e. gradient descent)
+- `Loss`: a loss function
 - `Trainer`: given a corpus, a network, an optimizer, and a loss function, initializes and optimizes a network's parameters
 
 Limitations:

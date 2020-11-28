@@ -11,7 +11,7 @@ using namespace toynet;
 BOOST_AUTO_TEST_CASE(difference_numbers)
 {
     DiffNumbers network(1, 2, 2);
-    const std::vector<std::vector<double>> x{{4.0, 3.0}};
+    const std::vector<ublas::vector<double>> x(1, convert({4.0, 3.0}));
 
     BOOST_CHECK_EQUAL(
         "hidden 1 width 2 inputs 2 loss 0\n"
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
 
     // Let's make sure this also works for x[1] > x[0]
     network.init_weights();
-    const std::vector<std::vector<double>> x2{{3.0, 4.0}};
+    const std::vector<ublas::vector<double>> x2(1, convert({3.0, 4.0}));
     for (int i = 0;  i < 60;  ++i) {
         network.forward_backward(x2);
         network.update_weights(0.01);
@@ -72,11 +72,11 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
 
     // Provide more than 1 example so the network can learn the proper function
     network.init_weights();
-    const std::vector<std::vector<double>> x3{
-        { 4.0,  3.0},
-        { 3.0,  4.0},
-        {-1.0,  5.0},
-        { 9.8, -3.1},
+    const std::vector<ublas::vector<double>> x3{
+        convert({ 4.0,  3.0}),
+        convert({ 3.0,  4.0}),
+        convert({-1.0,  5.0}),
+        convert({ 9.8, -3.1}),
     };
     for (int i = 0;  i < 60;  ++i) {
         network.forward_backward(x3);
@@ -91,13 +91,11 @@ BOOST_AUTO_TEST_CASE(difference_numbers)
     std::random_device rd;
     std::mt19937 e2(rd());
     std::uniform_real_distribution<> dist(-20, 150);
-    std::vector<std::vector<double>> x4(1000, {0.0, 0.0});
+    std::vector<ublas::vector<double>> x4(1000, convert({0.0, 0.0}));
     for (auto & ex : x4) {
         ex[0] = dist(e2);
         ex[1] = dist(e2);
     }
-    // std::cout << x4.front() << std::endl;
-    // std::cout << x4.back() << std::endl;
     for (int i = 0;  i < 20;  ++i) {
         network.forward_backward(x4);
         // std::cout << i << " " << network.loss << std::endl;

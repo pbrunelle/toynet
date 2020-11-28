@@ -4,59 +4,68 @@
 #include <functional>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 
 namespace toynet {
 
-std::vector<double> softmax(const std::vector<double>& v)
+ublas::vector<double> softmax(const ublas::vector<double>& v)
 {
     return stable_softmax(v);
 }
 
-std::vector<double> naive_softmax(const std::vector<double>& v)
+ublas::vector<double> naive_softmax(const ublas::vector<double>& v)
 {
     double sum = 0;
     for (auto x : v)
         sum += exp(x);
-    std::vector<double> ret(v.size());
+    ublas::vector<double> ret(v.size());
     for (int i = 0;  i < v.size();  ++i)
         ret[i] = exp(v[i]) / sum;
     return ret;
 }
 
-std::vector<double> stable_softmax(const std::vector<double> &v)
+ublas::vector<double> stable_softmax(const ublas::vector<double> &v)
 {
     double max = v.empty() ? 0.0 : *std::max_element(v.begin(), v.end());
     double sum = 0;
     for (auto x : v)
         sum += exp(x - max);
-    std::vector<double> ret(v.size());
+    ublas::vector<double> ret(v.size());
     for (int i = 0;  i < v.size();  ++i)
         ret[i] = exp(v[i] - max) / sum;
     return ret;
 }
 
-double magnitude(const std::vector<double>& v)
+double magnitude(const ublas::vector<double>& v)
 {
+#if 0
     double ret = 0.0;
     for (auto x : v)
         ret += x * x;
     return sqrt(ret);
+#else
+    return ublas::norm_2(v);
+#endif
 }
 
-double dot_product(const std::vector<double>& v1, const std::vector<double>& v2)
+double dot_product(const ublas::vector<double>& v1, const ublas::vector<double>& v2)
 {
+#if 0
     double ret = 0.0;
     for (int i = 0;  i < v1.size();  ++i)
         ret += v1[i] * v2[i];
     return ret;
+#else
+    return ublas::inner_prod(v1, v2);
+#endif
 }
 
-double cosine_distance(const std::vector<double>& v1, const std::vector<double>& v2)
+double cosine_distance(const ublas::vector<double>& v1, const ublas::vector<double>& v2)
 {
     return dot_product(v1, v2) / (magnitude(v1) * magnitude(v2));
 }
 
-std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vector<std::vector<double>>& points)
+std::vector<int> nearest_neighbors(const ublas::vector<double>& v, const std::vector<ublas::vector<double>>& points)
 {
     std::vector<std::pair<double, int>> distances(points.size());
     for (int i = 0;  i < points.size();  ++i)
@@ -68,37 +77,25 @@ std::vector<int> nearest_neighbors(const std::vector<double>& v, const std::vect
     return ret;
 }
 
-void add(std::vector<double>& to, const std::vector<double>& other)
+void add(std::vector<ublas::vector<double>>& to, const std::vector<ublas::vector<double>>& other)
 {
     for (int i = 0;  i < to.size();  ++i)
         to[i] += other[i];
 }
 
-void add(std::vector<std::vector<double>>& to, const std::vector<std::vector<double>>& other)
-{
-    for (int i = 0;  i < to.size();  ++i)
-        add(to[i], other[i]);
-}
-
-void add(std::vector<matrix<double>>& to, const std::vector<matrix<double>>& other)
+void add(std::vector<ublas::matrix<double>>& to, const std::vector<ublas::matrix<double>>& other)
 {
     for (int i = 0;  i < to.size();  ++i)
         to[i] += other[i];
 }
 
-void normalize(std::vector<double>& to, double denom)
+void normalize(std::vector<ublas::vector<double>>& to, double denom)
 {
     for (auto& d : to)
         d /= denom;
 }
 
-void normalize(std::vector<std::vector<double>>& to, double denom)
-{
-    for (auto& d : to)
-        normalize(d, denom);
-}
-
-void normalize(std::vector<matrix<double>>& to, double denom)
+void normalize(std::vector<ublas::matrix<double>>& to, double denom)
 {
     for (auto& d : to)
         d /= denom;
@@ -114,16 +111,14 @@ std::vector<int> get_context(const std::vector<int>& words, int index, int histo
     return ret;
 }
 
-void gradient_descent(std::vector<std::vector<double>>& out, const std::vector<std::vector<double>>& gradients, double lr)
+void gradient_descent(ublas::matrix<double>& out, const ublas::matrix<double>& gradients, double lr)
 {
-    for (int i = 0;  i < out.size();  ++i)
-        for (int j = 0;  j < out[i].size();  ++j)
-            out[i][j] -= gradients[i][j] * lr;
+    out -= gradients * lr;
 }
 
 CBOWModelGradients::CBOWModelGradients(int W, int D)
-    : P(W, std::vector<double>(D, 0.0))
-    , O(W, std::vector<double>(D, 0.0))
+    : P(ublas::zero_matrix<double>(W, D))
+    , O(ublas::zero_matrix<double>(W, D))
 {
 }
 
@@ -132,8 +127,8 @@ CBOWModel::CBOWModel(int W, int D, int historyN, int futureN)
     , D(D)
     , historyN(historyN)
     , futureN(futureN)
-    , P(W, std::vector<double>(D))
-    , O(W, std::vector<double>(D))
+    , P(W, D)
+    , O(W, D)
 {
 }
 
@@ -151,7 +146,7 @@ void CBOWModel::load(std::istream& is)
 
 std::vector<std::pair<double, int>> CBOWModel::predict(const std::vector<int>& context) const
 {
-    std::vector<double> smax = predict_helper(context);
+    ublas::vector<double> smax = predict_helper(context);
     std::vector<std::pair<double, int>> ret(W);
     for (int i = 0;  i < W;  ++i)
         ret[i] = std::make_pair(smax[i], i);
@@ -161,24 +156,23 @@ std::vector<std::pair<double, int>> CBOWModel::predict(const std::vector<int>& c
 
 double CBOWModel::predict(const std::vector<int>& context, int word) const
 {
-    std::vector<double> smax = predict_helper(context);
+    ublas::vector<double> smax = predict_helper(context);
     return smax[word];
 }
 
-std::vector<double> CBOWModel::predict_helper(const std::vector<int>& context) const
+ublas::vector<double> CBOWModel::predict_helper(const std::vector<int>& context) const
 {
     // average embedding of all context words
-    std::vector<double> avg(D, 0.0);
+    ublas::vector<double> avg(D, 0.0);
     for (int wordidx : context)
-        add(avg, P[wordidx]);
-    for (double &a : avg)
-        a /= context.size();
+        avg += ublas::row(P, wordidx);
+    avg /= context.size();
     // output layer (before softmax)
-    std::vector<double> out(W, 0.0);
+    ublas::vector<double> out(W, 0.0);
     for (int i = 0;  i < W;  ++i)
-        out[i] = dot_product(avg, O[i]);
+        out[i] = dot_product(avg, row(O, i));
     // softmax
-    std::vector<double> smax = softmax(out);
+    ublas::vector<double> smax = softmax(out);
     return smax;
 }
 

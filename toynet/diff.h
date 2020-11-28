@@ -2,9 +2,10 @@
 #include <vector>
 #include <boost/numeric/ublas/matrix.hpp>
 
-namespace toynet {
+// https://stackoverflow.com/a/1211402
+namespace ublas = boost::numeric::ublas;
 
-using namespace boost::numeric::ublas;
+namespace toynet {
 
 // Inmplementation of algorithms 6.3 and 6.4 (pp. 205-6) of the "Deep Learning"
 // book on a toy network.
@@ -22,7 +23,7 @@ struct DiffNumbers {
 
     void init_weights();
 
-    void forward_backward(const std::vector<std::vector<double>>& training_set);
+    void forward_backward(const std::vector<ublas::vector<double>>& training_set);
 
     void update_weights(double lr);
 
@@ -31,18 +32,18 @@ struct DiffNumbers {
     // The weights of the FFN
     // W[layer][unit index of previous layer][unit index of layer]
     // Where layer = 0 is the layer closest to the input
-    std::vector<matrix<double>> W;
+    std::vector<ublas::matrix<double>> W;
 
     // The gradients of the loss for a given example w.r.t. the weights
-    std::vector<matrix<double>> DW;
+    std::vector<ublas::matrix<double>> DW;
 
     // The pre-activations (since everything is linear in our network,
     // there are no post-activations)
     // A[layer][unit]
-    std::vector<std::vector<double>> A;
+    std::vector<ublas::vector<double>> A;
 
     // The gradients of the loss for a given example w.r.t. the pre-activations
-    std::vector<std::vector<double>> G;
+    std::vector<ublas::vector<double>> G;
 
     int hidden;  // the number of hidden layers
     int width;  // the width of each hidden layer
