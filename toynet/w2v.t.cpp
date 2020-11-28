@@ -580,7 +580,7 @@ BOOST_AUTO_TEST_CASE(Trainer_train)
     BOOST_CHECK_EQUAL(2, model.P[0].size());
     BOOST_CHECK_EQUAL(2, model.O.size());
     BOOST_CHECK_EQUAL(2, model.O[0].size());
-    std::cout << ss.str() << std::endl;
+    // std::cout << ss.str() << std::endl;
     // BOOST_CHECK_EQUAL(std::string(""), ss.str());
 }
 

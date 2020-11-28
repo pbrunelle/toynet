@@ -10,12 +10,14 @@ add_library(
     toynet
     w2v.cpp
     diff.cpp
+    loss.cpp
 )
 
 add_executable(
     unit_tests.tsk
     w2v.t.cpp
     diff.t.cpp
+    loss.t.cpp
 )
 
 target_include_directories(toynet PRIVATE . ${Boost_INCLUDE_DIRS})
