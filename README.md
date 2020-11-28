@@ -1,19 +1,13 @@
-# w2v
+# toynet
 
-A word2vec re-implementation
+A toy neural networks library for solving toy problems.
 
-## Building
+## Building and Testing
 
 ```
-cd src
+cd toynet
 mkdir -p build
 cd build
 bbcmake -64 ..
-make
-```
-
-## Testing
-
-```
-./w2v/w2v_unit_tests.tsk
+make && ./unit_tests.tsk
 ```
