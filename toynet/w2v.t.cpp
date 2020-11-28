@@ -1,10 +1,10 @@
 #include <w2v.h>
 #include <stlio.h>
 #include <iostream>
-#define BOOST_TEST_MODULE w2v
+#define BOOST_TEST_MODULE toynet
 #include <boost/test/unit_test.hpp>
 
-using namespace w2v;
+using namespace toynet;
 
 template<class T, class U>
 void check_close_vectors(const std::vector<T>& expected, const std::vector<U>& got, double tol=0.000001)

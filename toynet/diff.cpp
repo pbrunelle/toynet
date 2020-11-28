@@ -3,7 +3,7 @@
 #include <stlio.h>
 #include <sstream>
 
-namespace w2v {
+namespace toynet {
 
 void init_tensor(std::vector<matrix<double>>&V, int hidden, int width, int inputs)
 {
@@ -151,4 +151,4 @@ std::ostream& operator<<(std::ostream& os, const DiffNumbers& obj)
     return os;
 }
 
-} // namespace w2v
+} // namespace toynet

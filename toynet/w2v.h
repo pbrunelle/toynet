@@ -4,7 +4,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
-namespace w2v {
+namespace toynet {
 
 using namespace boost::numeric::ublas;
 
@@ -217,4 +217,4 @@ struct Trainer {
     const LearningRate *learningRate;
 };
 
-} // namespace w2v
+} // namespace toynet

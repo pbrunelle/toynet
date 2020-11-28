@@ -5,7 +5,7 @@
 #include <boost/test/unit_test.hpp>
 #include <random>
 
-using namespace w2v;
+using namespace toynet;
 
 BOOST_AUTO_TEST_CASE(difference_numbers)
 {

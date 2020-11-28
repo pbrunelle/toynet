@@ -5,7 +5,7 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-namespace w2v {
+namespace toynet {
 
 std::vector<double> softmax(const std::vector<double>& v)
 {
@@ -318,4 +318,4 @@ CBOWModel Trainer::train(const std::vector<int>& corpus) const
     return model;
 }
 
-} // namespace w2v
+} // namespace toynet

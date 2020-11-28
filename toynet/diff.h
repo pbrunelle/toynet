@@ -2,7 +2,7 @@
 #include <vector>
 #include <boost/numeric/ublas/matrix.hpp>
 
-namespace w2v {
+namespace toynet {
 
 using namespace boost::numeric::ublas;
 
@@ -52,4 +52,4 @@ struct DiffNumbers {
 
 std::ostream& operator<<(std::ostream& os, const DiffNumbers& obj);
 
-} // namespace w2v
+} // namespace toynet
