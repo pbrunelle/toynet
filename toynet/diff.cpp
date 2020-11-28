@@ -1,5 +1,6 @@
 #include <diff.h>
 #include <w2v.h>
+#include <loss.h>
 #include <stlio.h>
 #include <ublasio.h>
 #include <sstream>
@@ -51,6 +52,8 @@ DiffNumbers::DiffNumbers(int hidden, int width, int inputs)
 
 void DiffNumbers::forward_backward(const std::vector<std::vector<double>>& training_set)
 {
+    MSELoss mseloss;
+
     init_tensor(DW, hidden, width, inputs);
     init_tensor(A, hidden, width, inputs);
     init_tensor(G, hidden, width, inputs);
@@ -79,17 +82,11 @@ void DiffNumbers::forward_backward(const std::vector<std::vector<double>>& train
                 for (int k = 0;  k < W[i].size2();  ++k)
                     exA[i+1][k] += exA[i][j] * W[i](j, k);
     
-        // forward: MSE loss
+        // MSE loss and gradient of loss w.r.t. y_hat
         const double y_hat = exA[hidden+1][0];
-        const double diff = y - y_hat;
-        const double exloss = diff * diff;
-    
-        // backward: derivative of loss w.r.t. y_hat
-        // L(y_hat, y) = (y - y_hat)^2
-        //             = y^2 - 2*y*y_hat + y_hat^2
-        // d(L, y_hat) = -2*y + 2*y_hat
-        //             = -2 * diff
-        const double delta_loss_y_hat = -2.0 * diff;
+        double exloss;
+        double delta_loss_y_hat;
+        std::tie(exloss, delta_loss_y_hat) = mseloss(y, y_hat);
         exG[hidden+1][0] = delta_loss_y_hat;
     
         // backward: for each layer
