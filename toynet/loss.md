@@ -12,19 +12,19 @@ and `y_hat` to represent the output of the last layer, also of length `n`.
 
 ### Special Case: 1-Hot Expectation
 
-This is a special case where we expect `y` to be of the form `(0, 0, ..., 0, 1, 0, ..., 0, 0)`, i.e.
+This is a special case where `y` is of the form `(0, ..., 0, 1, 0, ...,  0)`, i.e.
 a single `y[i]` has value 1 and all other `y[j]` for `j != i` have value 0.
 
 Let's start with the definition of the softmax function for the `i`'th output:
 
 ```
-softmax(y_hat, i) = exp(y_hat_i) / sum_k(exp(y_hat_k))  [eq 0]
+softmax(y_hat, i) = exp(y_hat_i) / sum_k(exp(y_hat_k))
 ```
 
 We want to maximize the probability `p(y, y_hat) = softmax(y_hat, i)`.
 In order to make sure the gradient is [well scaled](https://stats.stackexchange.com/questions/174481/why-to-optimize-max-log-probability-instead-of-probability),
-we will instead minimize the negative of the log probability.
-Without any regularization terms, the loss function is simply:
+we instead minimize the negative of the log probability.
+Assuming no regularization terms, the loss function is:
 
 ```
 L(y, y_hat) = -ln(p(y, y_hat))
@@ -32,13 +32,14 @@ L(y, y_hat) = -ln(p(y, y_hat))
             = -ln(exp(y_hat_i) / sum_k(exp(y_hat_k)))
 ```
 
-Using the logarithm identity [ln(x/y) = ln(x) - ln(y)](https://en.wikipedia.org/wiki/List_of_logarithmic_identities#Using_simpler_operations):
+We can modify this slightly to help compute the derivative by using the logarithm identity [ln(x/y) = ln(x) - ln(y)](https://en.wikipedia.org/wiki/List_of_logarithmic_identities#Using_simpler_operations):
 
 ```
 L(y, y_hat) = -ln(exp(y_hat_i)) + ln(sum_k(exp(y_hat_k)))
 ```
 
-Let's compute the gradient of `L` w.r.t. output unit `j`:
+Now let's compute the gradient of `L` w.r.t. output unit `j`.  We will need to make `n` such computations,
+one for each output node.
 
 ```
 d(L, y_hat_j) = d(-ln(exp(y_hat_i)) + ln(sum_k(exp(y_hat_k))), y_hat_j)
@@ -50,22 +51,30 @@ First we use the [rule of linearity](https://en.wikipedia.org/wiki/Linearity_of_
 d(L, y_hat_j) = -d(ln(exp(y_hat_i)), y_hat_j) + d(ln(sum_k(exp(y_hat_k))), y_hat_j)
 ```
 
-The [derivative of `ln(f(x))`](https://en.wikipedia.org/wiki/Logarithm#Derivative_and_antiderivative) is `f'(x)/f(x)`:
+Knowing that derivative of ln(f(x)) [is f'(x)/f(x)](https://en.wikipedia.org/wiki/Logarithm#Derivative_and_antiderivative):
 
 ```
 d(L, y_hat_j) = -d(exp(y_hat_i), y_hat_j) / exp(y_hat_i) + d(sum_k(exp(y_hat_k)), y_hat_j) / sum_k(exp(y_hat_k))
 ```
 
-The [derivative of exp(x)](https://en.wikipedia.org/wiki/Derivative#Rules_for_basic_functions) is `exp(x)`
-the [derivative of a constant](https://en.wikipedia.org/wiki/Derivative#Rules_for_combined_functions) is 0, and again using the rule of linearity:
+Knowing the derivative of exp(x) [is exp(x)](https://en.wikipedia.org/wiki/Derivative#Rules_for_basic_functions) and
+the derivative of a constant [is 0](https://en.wikipedia.org/wiki/Derivative#Rules_for_combined_functions),
+and again using the rule of linearity:
 
 ```
 d(L, y_hat_j) = -d(exp(y_hat_i), y_hat_j) / exp(y_hat_i) + exp(y_hat_j) / sum_k(exp(y_hat_k))
 ```
 
-There are two cases: `i = j` and `i != j`.
-We note that `exp(y_hat_i)` is constant if `i != j` (and therefore its derivative is 0); and it is `exp(y_hat_i)` if `i = j`.
-We also note that the second term `exp(y_hat_j) / sum_k(exp(y_hat_k))` is the definition of `softmax(y_hat, j)`.
+We note that the second term `exp(y_hat_j) / sum_k(exp(y_hat_k))` is the definition of `softmax(y_hat, j)`:
+
+```
+d(L, y_hat_j) = -d(exp(y_hat_i), y_hat_j) / exp(y_hat_i) + softmax(y_hat, j)
+```
+
+We can simplify the first term `-d(exp(y_hat_i), y_hat_j) / exp(y_hat_i)`.  There are two cases: `i = j` and `i != j`:
+- `i = j`: `d(exp(y_hat_i), y_hat_j)` is `exp(y_hat_i)`, which is the same value as the denominator, and the first term is 1
+- `i != j`: `exp(y_hat_i)` is constant, its derivative is 0, and the first term is 0
+
 Therefore:
 
 ```
