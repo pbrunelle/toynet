@@ -56,3 +56,14 @@ BOOST_AUTO_TEST_CASE(mse_loss)
         check_close_vectors(convert({-2.28, -1.435488}), res.second);
     }
 }
+
+BOOST_AUTO_TEST_CASE(softmax_loss_3)
+{
+    // https://stackoverflow.com/questions/34968722/how-to-implement-the-softmax-function-in-python
+    SoftmaxLoss loss;
+    const ublas::vector<double> y = convert({0.0, 1.0, 0.0});
+    const ublas::vector<double> y_hat = convert({3.0, 1.0, 0.2});
+    auto res = loss(y, y_hat);
+    BOOST_CHECK_CLOSE(2.1791041747850026, res.first, 1e-6);
+    check_close_vectors(convert({0.8360188, -1.0+0.11314284, 0.05083836}), res.second, 1e-5);
+}

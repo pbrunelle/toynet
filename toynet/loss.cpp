@@ -1,5 +1,7 @@
 #include <loss.h>
+#include <w2v.h> // softmax
 #include <exception>
+#include <math.h>
 #include <sstream>
 
 namespace toynet {
@@ -28,7 +30,7 @@ std::pair<double, double> MSELoss::operator()(
     // L(y, y_hat) = (y - y_hat)^2
     //             = y^2 - 2*y*y_hat + y_hat^2
     //
-    // The derivative of the MSE loss function w.r.t. y_ht:
+    // The derivative of the MSE loss function w.r.t. y_hat:
     // d(L, y_hat) = -2*y + 2*y_hat
     //             = -2 * (y - y_hat)
     const double diff = y - y_hat;
@@ -49,6 +51,24 @@ std::pair<double, ublas::vector<double>> MSELoss::operator()(
     }
     loss /= y.size();
     return std::make_pair(loss, gradients);
+}
+
+std::pair<double, ublas::vector<double>> SoftmaxLoss::operator()(
+    const ublas::vector<double>& y, const ublas::vector<double>& y_hat) const
+{
+    // See loss.md for explanations
+    ublas::vector<double> soft = softmax(y_hat);
+    // Find the index of the only element of `y` with non-zero value
+    int i = 0;
+    for ( ;  i < y.size();  ++i)
+        if (y[i] > 0.5)
+            break;
+    // Compute the loss
+    double loss = -std::log(soft[i]);
+    // Compute the gradient of the loss w.r.t. y_hat
+    ublas::vector<double> g = soft;
+    g[i] -= 1.0;
+    return std::make_pair(loss, g);
 }
 
 } // namespace toynet

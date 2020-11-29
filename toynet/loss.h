@@ -29,8 +29,9 @@ struct MSELoss : public Loss {
     virtual std::string name() const override {return "MSELoss";}
 };
 
-// Softmax loss function: TODO
+// Softmax loss function
 struct SoftmaxLoss : public Loss {
+    // Pre-condition: there exists one j such that y[j] == 1 and y[i] == 0 for all i != j
     virtual std::pair<double, ublas::vector<double>> operator()(
         const ublas::vector<double>& y, const ublas::vector<double>& y_hat) const override;
     virtual std::string name() const override {return "SoftmaxLoss";}
