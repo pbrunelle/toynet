@@ -28,7 +28,7 @@ case since there's a single output node): `L(y, y_hat) = (y - y_hat)^2`.
 ## Using a Single Example
 
 We use a single training example: `x = (4, 3)`.
-The weights are initialized in a deterministic fashion:
+The weights are initialized as:
 
 ```
 w_13 = -0.2,  w_14 = -0.1,  w_23 =  0.0,  w_24 =  0.1
@@ -40,9 +40,11 @@ w_35 =  0.2,  w_45 = -0.2
 We can very simply compute the activations:
 
 ```
-U1 =  4.0,  U2 =  3.0
-U3 = -0.8,  U4 = -0.1
-U5 = -0.14
+U1 = x[0] = 4.0
+U2 = x[1] = 3.0
+U3 = w_13 * U1 + w_23 * U2 = -0.2 *  4.0 +  0.0 *  3.0 = -0.8
+U4 = w_14 * U1 + w_24 * U2 = -0.1 *  4.0 +  0.1 *  3.0 = -0.1
+U5 = w_35 * U3 + w_45 * U4 =  0.2 * -0.8 + -0.2 * -0.1 = -0.14
 ```
 
 And the loss:
