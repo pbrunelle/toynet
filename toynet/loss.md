@@ -51,14 +51,14 @@ First we use the [rule of linearity](https://en.wikipedia.org/wiki/Linearity_of_
 d(L, y_hat_j) = -d(ln(exp(y_hat_i)), y_hat_j) + d(ln(sum_k(exp(y_hat_k))), y_hat_j)
 ```
 
-Knowing that derivative of ln(f(x)) [is f'(x)/f(x)](https://en.wikipedia.org/wiki/Logarithm#Derivative_and_antiderivative):
+Knowing that [the derivative of ln(f(x))](https://en.wikipedia.org/wiki/Logarithm#Derivative_and_antiderivative) is f'(x)/f(x):
 
 ```
 d(L, y_hat_j) = -d(exp(y_hat_i), y_hat_j) / exp(y_hat_i) + d(sum_k(exp(y_hat_k)), y_hat_j) / sum_k(exp(y_hat_k))
 ```
 
-Knowing the derivative of exp(x) [is exp(x)](https://en.wikipedia.org/wiki/Derivative#Rules_for_basic_functions) and
-the derivative of a constant [is 0](https://en.wikipedia.org/wiki/Derivative#Rules_for_combined_functions),
+Knowing [the derivative of exp(x)](https://en.wikipedia.org/wiki/Derivative#Rules_for_basic_functions) is exp(x) and
+[the derivative of a constant](https://en.wikipedia.org/wiki/Derivative#Rules_for_combined_functions) is 0,
 and again using the rule of linearity:
 
 ```
