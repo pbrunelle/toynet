@@ -25,7 +25,7 @@ There are no activation functions (i.e. all activations are linear).
 The loss function is the mean square error (or just the square error in this
 case since there's a single output node): `L(y, y_hat) = (y - y_hat)^2`.
 
-## Using a Single Example
+## Training on a Single Example
 
 We use a single training example: `x = (4, 3)`.
 The weights are initialized as:
@@ -63,4 +63,4 @@ TODO
 
 ### After Convergence
 
-## Using More Than 1 Example
+## Training on Many Examples
