@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS "-g")
 
 add_library(
     toynet
+    ublasio.cpp
     w2v.cpp
     diff.cpp
     loss.cpp
@@ -15,6 +16,7 @@ add_library(
 
 add_executable(
     unit_tests.tsk
+    ublasio.t.cpp
     w2v.t.cpp
     diff.t.cpp
     loss.t.cpp

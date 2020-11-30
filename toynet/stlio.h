@@ -1,6 +1,5 @@
-#include <vector>
 #include <ostream>
-#include <boost/numeric/ublas/matrix.hpp>
+#include <vector>
 
 namespace std {
 

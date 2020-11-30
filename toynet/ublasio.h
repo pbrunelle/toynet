@@ -1,29 +1,42 @@
 #include <ostream>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/vector.hpp>
 
 namespace boost {
 namespace numeric {
 namespace ublas {
 
 template<class T>
-std::ostream& operator<<(std::ostream& os, const matrix<T>& obj)
+void _help_print_ublas_1d(std::ostream& os, const T& o)
 {
-    std::vector<std::vector<T>> m(obj.size1());
-    for (int i = 0;  i < obj.size1();  ++i)
-        m[i].resize(obj.size2());
-    for (int i = 0;  i < obj.size1();  ++i)
-        for (int j = 0;  j < obj.size2();  ++j)
-            m[i][j] = obj(i, j);
-    return os << m;
+    os << "[";
+    for (int i = 0;  i < o.size();  ++i) {
+        if (i > 0)
+            os << ", ";
+        os << o[i];
+    }
+    os << "]";
 }
 
 template<class T>
-std::ostream& operator<<(std::ostream& os, const vector<T>& obj)
+std::ostream& operator<<(std::ostream& os, const vector<T>& o)
 {
-    std::vector<T> m(obj.size());
-    for (int i = 0;  i < obj.size();  ++i)
-        m[i] = obj(i);
-    return os << m;
+    _help_print_ublas_1d(os, o);
+    return os;
+}
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const matrix<T>& o)
+{
+    os << "[";
+    for (int i = 0;  i < o.size1();  ++i) {
+        if (i > 0)
+            os << ", ";
+        _help_print_ublas_1d(os, row(o, i));
+    }
+    os << "]";
+    return os;
 }
 
 } // namespace ublas
