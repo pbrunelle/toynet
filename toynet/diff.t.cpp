@@ -2,6 +2,7 @@
 #include <toynet/w2v.h>
 #include <toynet/stlio.h>
 #include <toynet/ublasio.h>
+#include <toynet/ublasconvert.h>
 #include <iostream>
 #include <random>
 #include <boost/test/unit_test.hpp>

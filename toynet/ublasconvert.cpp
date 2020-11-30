@@ -1,5 +1,7 @@
 #include <toynet/ublasconvert.h>
 
+namespace toynet {
+
 ublas::vector<double> convert(const std::vector<double>& v)
 {
     ublas::vector<double> ret(v.size());
@@ -7,3 +9,5 @@ ublas::vector<double> convert(const std::vector<double>& v)
         ret(i) = v[i];
     return ret;
 }
+
+} // namespace toynet

@@ -1,6 +1,6 @@
 #include <toynet/loss.h>
-#include <toynet/stlio.h>
-#include <toynet/w2v.h> // convert
+#include <toynet/ublasconvert.h>
+#include <toynet/ublastest.h>
 #include <boost/test/unit_test.hpp>
 
 using namespace toynet;
@@ -9,15 +9,6 @@ using namespace toynet;
 ublas::vector<double> v1(double d)
 {
     return ublas::vector<double>(1, d);
-}
-
-template<class T, class U>
-void check_close_vectors(const T& expected, const U& got, double tol=0.000001)
-{
-    BOOST_REQUIRE_EQUAL(expected.size(), got.size());
-    for (int i = 0;  i < expected.size();  ++i) {
-        BOOST_CHECK_CLOSE(expected[i], got[i], tol);
-    }
 }
 
 BOOST_AUTO_TEST_CASE(mse_loss)

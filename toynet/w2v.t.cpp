@@ -1,20 +1,13 @@
 #include <toynet/w2v.h>
-#include <toynet/stlio.h>
-#include <toynet/ublasio.h>
-#include <iostream>
 #define BOOST_TEST_MODULE toynet
+#include <toynet/stlio.h>
+#include <toynet/ublasconvert.h>
+#include <toynet/ublasio.h>
+#include <toynet/ublastest.h>
+#include <iostream>
 #include <boost/test/unit_test.hpp>
 
 using namespace toynet;
-
-template<class T, class U>
-void check_close_vectors(const T& expected, const U& got, double tol=0.000001)
-{
-    BOOST_REQUIRE_EQUAL(expected.size(), got.size());
-    for (int i = 0;  i < expected.size();  ++i) {
-        BOOST_CHECK_CLOSE(expected[i], got[i], tol);
-    }
-}
 
 BOOST_AUTO_TEST_CASE(softmax_numerical_stability)
 {
