@@ -1,6 +1,6 @@
-#include <loss.h>
-#include <stlio.h>
-#include <w2v.h> // convert
+#include <toynet/loss.h>
+#include <toynet/stlio.h>
+#include <toynet/w2v.h> // convert
 #include <boost/test/unit_test.hpp>
 
 using namespace toynet;

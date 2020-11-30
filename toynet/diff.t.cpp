@@ -1,10 +1,10 @@
-#include <diff.h>
-#include <w2v.h>
-#include <stlio.h>
-#include <ublasio.h>
+#include <toynet/diff.h>
+#include <toynet/w2v.h>
+#include <toynet/stlio.h>
+#include <toynet/ublasio.h>
 #include <iostream>
-#include <boost/test/unit_test.hpp>
 #include <random>
+#include <boost/test/unit_test.hpp>
 
 using namespace toynet;
 

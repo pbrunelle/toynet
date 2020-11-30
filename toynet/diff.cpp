@@ -1,8 +1,8 @@
-#include <diff.h>
-#include <w2v.h>
-#include <loss.h>
-#include <stlio.h>
-#include <ublasio.h>
+#include <toynet/diff.h>
+#include <toynet/w2v.h>
+#include <toynet/loss.h>
+#include <toynet/stlio.h>
+#include <toynet/ublasio.h>
 #include <sstream>
 
 namespace toynet {

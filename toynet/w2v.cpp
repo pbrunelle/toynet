@@ -1,4 +1,4 @@
-#include <w2v.h>
+#include <toynet/w2v.h>
 #include <algorithm>
 #include <cmath>
 #include <functional>

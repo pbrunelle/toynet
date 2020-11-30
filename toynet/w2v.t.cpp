@@ -1,6 +1,6 @@
-#include <w2v.h>
-#include <stlio.h>
-#include <ublasio.h>
+#include <toynet/w2v.h>
+#include <toynet/stlio.h>
+#include <toynet/ublasio.h>
 #include <iostream>
 #define BOOST_TEST_MODULE toynet
 #include <boost/test/unit_test.hpp>

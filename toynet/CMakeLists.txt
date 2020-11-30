@@ -20,8 +20,8 @@ add_executable(
     loss.t.cpp
 )
 
-target_include_directories(toynet PRIVATE . ${Boost_INCLUDE_DIRS})
-target_include_directories(unit_tests.tsk PRIVATE . ${Boost_INCLUDE_DIRS})
+target_include_directories(toynet PRIVATE .. ${Boost_INCLUDE_DIRS})
+target_include_directories(unit_tests.tsk PRIVATE .. ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(toynet PUBLIC)
 target_link_libraries(unit_tests.tsk PRIVATE toynet ${Boost_LIBRARIES} rt)
