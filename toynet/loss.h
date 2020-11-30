@@ -1,7 +1,5 @@
+#include <toynet/ublas.h>
 #include <boost/numeric/ublas/vector.hpp>
-
-// https://stackoverflow.com/a/1211402
-namespace ublas = boost::numeric::ublas;
 
 namespace toynet {
 

@@ -1,11 +1,9 @@
+#include <toynet/ublas.h>
 #include <iostream>
 #include <vector>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
-
-// https://stackoverflow.com/a/1211402
-namespace ublas = boost::numeric::ublas;
 
 namespace toynet {
 
