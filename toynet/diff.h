@@ -19,6 +19,8 @@ namespace toynet {
 // There are no regularization terms.
 // We perform gradient descent (i.e. no SGD).
 // We perform simple weight update: `W' = W - lr * DW`.
+// The network keeps track of (average) activations and gradients obtained from
+// the last invocation of `forward_backward`.
 //
 // See `diff.md` for a complete description.
 struct DiffNumbers {

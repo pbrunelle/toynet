@@ -68,15 +68,15 @@ void DiffNumbers::forward_backward(const std::vector<ublas::vector<double>>& tra
         init_tensor(exA, hidden, width, inputs);
         init_tensor(exG, hidden, width, inputs);
 
-        // ground truth: y = f(x) = x[0] - x[1] + x[2] - x[3] ...
+        // Ground truth: y = f(x) = x[0] - x[1] + x[2] - x[3] ...
         double y = 0.0;
         for (int i = 0;  i < x.size();  ++i)
             y += (i % 2) ? -x(i) : x(i);
     
-        // input layer
+        // Input layer
         exA[0] = x;
     
-        // forward: hidden layers and output layer
+        // Forward: hidden layers and output layer
         for (int i = 0;  i < hidden+1;  ++i)
             for (int j = 0;  j < W[i].size1();  ++j)
                 for (int k = 0;  k < W[i].size2();  ++k)
@@ -89,7 +89,7 @@ void DiffNumbers::forward_backward(const std::vector<ublas::vector<double>>& tra
         std::tie(exloss, delta_loss_y_hat) = mseloss(y, y_hat);
         exG[hidden+1](0) = delta_loss_y_hat;
     
-        // backward: for each layer
+        // Backward: for each layer from the last
         for (int i = hidden;  i >= 0;  --i) {
             const auto& g = exG[i+1];
     
@@ -111,7 +111,8 @@ void DiffNumbers::forward_backward(const std::vector<ublas::vector<double>>& tra
                     exG[i](j) += W[i](j, k) * g(k);
         }
 
-        // Add the matrices for example `x` to the overall matrices across all training examples
+        // Add the matrices specific to example `x` to the overall matrices
+        // across all training examples
         add(DW, exDW);
         add(A, exA);
         add(G, exG);
