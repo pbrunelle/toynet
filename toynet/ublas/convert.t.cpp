@@ -1,4 +1,4 @@
-#include <toynet/ublasconvert.h>
+#include <toynet/ublas/convert.h>
 #include <boost/test/unit_test.hpp>
 
 using namespace toynet;

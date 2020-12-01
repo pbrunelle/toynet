@@ -1,9 +1,9 @@
 #include <toynet/w2v.h>
 #define BOOST_TEST_MODULE toynet
 #include <toynet/stlio.h>
-#include <toynet/ublasconvert.h>
-#include <toynet/ublasio.h>
-#include <toynet/ublastest.h>
+#include <toynet/ublas/convert.h>
+#include <toynet/ublas/io.h>
+#include <toynet/ublas/test.h>
 #include <iostream>
 #include <boost/test/unit_test.hpp>
 

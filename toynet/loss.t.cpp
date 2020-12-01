@@ -1,6 +1,6 @@
 #include <toynet/loss.h>
-#include <toynet/ublasconvert.h>
-#include <toynet/ublastest.h>
+#include <toynet/ublas/convert.h>
+#include <toynet/ublas/test.h>
 #include <boost/test/unit_test.hpp>
 
 using namespace toynet;

@@ -1,8 +1,8 @@
 #include <toynet/diff.h>
 #include <toynet/w2v.h>
 #include <toynet/stlio.h>
-#include <toynet/ublasio.h>
-#include <toynet/ublasconvert.h>
+#include <toynet/ublas/io.h>
+#include <toynet/ublas/convert.h>
 #include <iostream>
 #include <random>
 #include <boost/test/unit_test.hpp>

@@ -1,5 +1,5 @@
-#include <toynet/ublasio.h>
-#include <toynet/ublas.h>
+#include <toynet/ublas/io.h>
+#include <toynet/ublas/ublas.h>
 #include <sstream>
 #include <boost/test/unit_test.hpp>
 

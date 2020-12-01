@@ -2,7 +2,7 @@
 #include <toynet/w2v.h>
 #include <toynet/loss.h>
 #include <toynet/stlio.h>
-#include <toynet/ublasio.h>
+#include <toynet/ublas/io.h>
 #include <sstream>
 
 namespace toynet {

@@ -1,4 +1,4 @@
-#include <toynet/ublas.h>
+#include <toynet/ublas/ublas.h>
 #include <iostream>
 #include <vector>
 #include <boost/serialization/access.hpp>

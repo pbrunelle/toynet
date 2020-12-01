@@ -1,4 +1,4 @@
-#include <toynet/ublas.h>
+#include <toynet/ublas/ublas.h>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/test/unit_test.hpp>
 
