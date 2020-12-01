@@ -1,5 +1,5 @@
 #include <toynet/diff.h>
-#include <toynet/w2v.h>
+#include <toynet/math.h>
 #include <toynet/loss.h>
 #include <toynet/stlio.h>
 #include <toynet/ublas/io.h>

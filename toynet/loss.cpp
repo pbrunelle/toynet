@@ -1,5 +1,5 @@
 #include <toynet/loss.h>
-#include <toynet/w2v.h> // softmax
+#include <toynet/math.h>
 #include <exception>
 #include <math.h>
 #include <sstream>

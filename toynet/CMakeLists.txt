@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS "-g")
 
 add_library(
     toynet
+    math.cpp
     ublas/convert.cpp
     ublas/io.cpp
     w2v.cpp
@@ -20,6 +21,7 @@ add_executable(
     ublas/convert.t.cpp
     ublas/io.t.cpp
     w2v.t.cpp
+    math.t.cpp
     diff.t.cpp
     loss.t.cpp
 )

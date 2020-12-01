@@ -7,39 +7,6 @@
 
 namespace toynet {
 
-ublas::vector<double> softmax(const ublas::vector<double>& v);
-
-ublas::vector<double> naive_softmax(const ublas::vector<double>& v);
-
-ublas::vector<double> stable_softmax(const ublas::vector<double>& v);
-
-double magnitude(const ublas::vector<double>& v);
-
-// pre-condition: v1.size() == v2.size()
-double dot_product(const ublas::vector<double>& v1, const ublas::vector<double>& v2);
-
-// pre-condition: v1.size() == v2.size()
-// pre-condition: ||v1|| != 0 && ||v2|| != 0
-double cosine_distance(const ublas::vector<double>& v1, const ublas::vector<double>& v2);
-
-// pre-condition: ||v|| != 0
-// pre-condition: for each p in points: p.size() == v.size() && ||p|| != 0
-std::vector<int> nearest_neighbors(const ublas::vector<double>& v, const std::vector<ublas::vector<double>>& points);
-
-// element-wise addition
-// pre-condition: to.size() == other.size()
-void add(std::vector<ublas::vector<double>>& to, const std::vector<ublas::vector<double>>& other);
-
-// element-wise addition
-void add(std::vector<ublas::matrix<double>>& to, const std::vector<ublas::matrix<double>>& other);
-
-// divide each element by a constant
-// pre-condition: denom != 0.0
-void normalize(std::vector<ublas::vector<double>>& to, double denom);
-
-// divide each element by a constant
-void normalize(std::vector<ublas::matrix<double>>& to, double denom);
-
 // Get the context around word `index` from a corpus `words`, using a maximum
 // of `historyN` words before `index` and `futureN` words after `index`.
 // The word at `index` is *not* part of the context.

@@ -1,5 +1,4 @@
 #include <toynet/diff.h>
-#include <toynet/w2v.h>
 #include <toynet/stlio.h>
 #include <toynet/ublas/io.h>
 #include <toynet/ublas/convert.h>
