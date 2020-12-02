@@ -114,7 +114,7 @@ case since there's a single output node): `L(y, y_hat) = (y - y_hat)^2`.
 
 ## Training on a Single Example
 
-We use a single training example: `x = (4, 3)`.
+We use a single training example: `x = (4, 3)` and by definition of the problem, `y = 1`.
 The weights are initialized as:
 
 ```
@@ -127,22 +127,29 @@ w_35 =  0.2,  w_45 = -0.2
 We can very simply compute the activations:
 
 ```
-U1  =  x[0]                                                 =   4.0
-U2  =  x[1]                                                 =   3.0
-U3  =  w_13 * U1 + w_23 * U2  =  -0.2 *  4.0 +  0.0 *  3.0  =  -0.8
-U4  =  w_14 * U1 + w_24 * U2  =  -0.1 *  4.0 +  0.1 *  3.0  =  -0.1
-U5  =  w_35 * U3 + w_45 * U4  =   0.2 * -0.8 + -0.2 * -0.1  =  -0.14
+U1  =  x[0]                                         =   4.0
+U2  =  x[1]                                         =   3.0
+U3  =  w_13*U1 + w_23*U2  =  -0.2* 4.0 +  0.0* 3.0  =  -0.8
+U4  =  w_14*U1 + w_24*U2  =  -0.1* 4.0 +  0.1* 3.0  =  -0.1
+U5  =  w_35*U3 + w_45*U4  =   0.2*-0.8 + -0.2*-0.1  =  -0.14
 ```
 
 And the loss:
 
 ```
-L  = 1.14^2 = 1.2996
+L  =  (y - U5)^2          =  (1 + 0.14)^2           =   1.2996
 ```
 
 We can then compute the gradient of the loss w.r.t. U5:
 
-TODO
+```
+d(L, U5) = d((y - U5)^2, U5)
+         = d(y^2 - 2*y*U5 + U5^2, U5)
+         = -2*y + 2*U5
+         = -2*(y - U5)
+         = -2*1.14
+         = -2.28
+```
 
 ### Updating the Weights
 
