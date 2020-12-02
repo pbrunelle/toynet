@@ -8,7 +8,7 @@ A toy neural networks library for solving toy problems.
 cd toynet
 mkdir -p build
 cd build
-bbcmake -64 ..
+cmake -64 ..
 make && ./unit_tests.tsk
 ```
 

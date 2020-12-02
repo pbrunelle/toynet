@@ -69,7 +69,7 @@ struct Options
             ("help,h", bool_switch(&help), "print help message")
             ("hidden,H", value(&hidden), "number of hidden layers")
             ("width,W", value(&width), "width of hidden layers")
-            ("inputs,I", value(&hidden), "width of input layer")
+            ("inputs,I", value(&inputs), "width of input layer")
             ("epochs,e", value(&epochs), "number of training epochs")
             ("lr", value(&lr), "learning rate")
             ("training", value(&training), "training data")
