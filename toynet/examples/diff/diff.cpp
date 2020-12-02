@@ -1,4 +1,4 @@
-#include <toynet/diff.h>
+#include <toynet/examples/diff/diff.h>
 #include <toynet/math.h>
 #include <toynet/loss.h>
 #include <toynet/stlio.h>
