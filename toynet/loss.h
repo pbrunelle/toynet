@@ -27,7 +27,7 @@ struct MSELoss : public Loss {
     virtual std::string name() const override {return "MSELoss";}
 };
 
-// Softmax loss function
+// Cross-entropy over softmax output
 struct SoftmaxLoss : public Loss {
     // Pre-condition: there exists one j such that y[j] == 1 and y[i] == 0 for all i != j
     virtual std::pair<double, ublas::vector<double>> operator()(

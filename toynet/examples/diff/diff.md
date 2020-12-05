@@ -1,7 +1,7 @@
 # Simple Network: Compute Difference of Two Numbers
 
 The goal of this document is to explain the simple network from module `diff`,
-and show how algorithms 6.3 and 6.4 of the Deep Learning book are applied
+and show how algorithms 6.3 and 6.4 of the *Deep Learning* book are applied
 to compute the gradient.  I'll use an example to show in details how the
 forward and backward passes operate, i.e. how the activations and gradients
 are computed.
@@ -127,11 +127,28 @@ w_35 =  0.2,  w_45 = -0.2
 We can very simply compute the activations:
 
 ```
-U1  =  x[0]                                         =   4.0
-U2  =  x[1]                                         =   3.0
+U1  =  x_0                                          =   4.0
+U2  =  x_1                                          =   3.0
 U3  =  w_13*U1 + w_23*U2  =  -0.2* 4.0 +  0.0* 3.0  =  -0.8
 U4  =  w_14*U1 + w_24*U2  =  -0.1* 4.0 +  0.1* 3.0  =  -0.1
 U5  =  w_35*U3 + w_45*U4  =   0.2*-0.8 + -0.2*-0.1  =  -0.14
+```
+
+Or using linear algebra:
+
+```
+W1 = [w_13   w_23]                         = [-0.2   0.0]
+     [w_14   w_24]                           [-0.1   0.1]
+
+W2 = [w_35   w_45]                         = [ 0.2  -0.2]
+
+h0 = [x_0]                                 = [ 4.0]
+     [x_1]                                   [ 3.0]
+
+h1 = W1 * h0 = [-0.2 *  4.0 +  0.0 *  3.0] = [-0.8]
+               [-0.1 *  4.0 +  0.1 *  3.0]   [-0.1]
+
+h2 = W2 * h1 = [ 0.2 * -0.8 + -0.2 * -0.1] = [-0.14]
 ```
 
 And the loss:
@@ -140,21 +157,86 @@ And the loss:
 L  =  (y - U5)^2          =  (1 + 0.14)^2           =   1.2996
 ```
 
-We can then compute the gradient of the loss w.r.t. U5:
+We can then compute the gradient of the loss w.r.t. the output layer:
 
 ```
-d(L, U5) = d((y - U5)^2, U5)
-         = d(y^2 - 2*y*U5 + U5^2, U5)
-         = -2*y + 2*U5
-         = -2*(y - U5)
-         = -2*1.14
-         = -2.28
+d(L, h2) = [d(L, U5)]
+         = [d((y - U5)^2, U5)]
+         = [d(y^2 - 2*y*U5 + U5^2, U5)]
+         = [-2*y + 2*U5]
+         = [-2*(y - U5)]
+         = [-2*1.14]
+         = [-2.28]
 ```
+
+*TODO*: Provide the intuition behind these values.
+
+Because there are no non-linear activations, we can then compute the gradient w.r.t. W2:
+
+```
+d(L, W2) = d(L, h2) * tr(h_1)
+         = [-2.28] * [-0.8 -0.1]
+         = [-2.28 * -0.8   -2.28 * -0.1]
+         = [1.824   0.228]
+```
+
+We propagate the gradients w.r.t. the next lower-level hidden layers activations:
+
+```
+d(L, h1) = tr(W2) * d(L, h2)
+         = [ 0.2] * [-2.28]
+           [-0.2]
+         = [-0.456]
+           [ 0.456]
+```
+
+We repeat.  Compute the gradient w.r.t. W1:
+
+```
+d(L, W1) = d(L, h1) * tr(h_0)
+         = [-0.456] * [ 4.0   3.0]
+           [ 0.456]
+         = [-1.824  -1.368]
+           [ 1.824   1.368]
+```
+
+Compute the gradient w.r.t. h0:
+
+```
+d(L, h0) = tr(W1) * d(L, h1)
+         = [-0.2  -0.1] * [-0.456]
+           [ 0.0   0.1]   [ 0.456]
+         = [ 0.0456]
+           [ 0.0456]
+```
+
+And that is the ball game.
 
 ### Updating the Weights
 
-### Second Pass
+The is very simple.  Using a learning rate of 0.1 and following the "apply update"
+step from Algorithm 8.1:
 
-### After Convergence
+```
+W1' = W1 - lr * d(L, W1)
+    = [-0.2   0.0] - 0.1 * [-1.824  -1.368]
+      [-0.1   0.1]         [ 1.824   1.368]
+    = [-0.0176   0.1368]
+      [-0.2824  -0.0368]
 
-## Training on Many Examples
+W2' = W2 - lr * d(L, W2)
+    = [ 0.2  -0.2] - 0.1 * [1.824   0.228]
+    = [ 0.0176  -0.2228]
+```
+
+This is the first epoch.  We can continue for many epochs.
+
+## Questions and insights
+
+* Example in which the loss diverge and I end up with nan's.  (Make sure it's not a bug in my code!)
+* Does momentum fix the divergence?
+* Can I come up with an example in which on every iteration, the updates to the weights mean that the loss function stays the same and the updates keep canceling each other?
+* If I have a single example, I don't actually learn the difference between two numbers.
+* But if I have 4 examples, I can learn that.
+    * What about 2 examples?
+    * Does that hold no matter how I initialize the weights?
