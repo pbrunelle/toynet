@@ -32,20 +32,19 @@ BOOST_AUTO_TEST_CASE(test_Network)
 
 BOOST_AUTO_TEST_CASE(test_Forward)
 {
-    diff2::Forward fwd;
     diff2::Network network(1, 2, 2, 1);
-    std::vector<diff2::Tensor1D> A = network.get1D();
-    BOOST_CHECK_EQUAL("[[0, 0], [0, 0], [0]]", print(A));
-    fwd.forward(network, A, convert({4.0, 3.0}));
-    BOOST_CHECK_EQUAL("[[4, 3], [-0.8, -0.1], [-0.14]]", print(A));
-    fwd.forward(network, A, convert({3.0, 4.0}));
-    BOOST_CHECK_EQUAL("[[3, 4], [-0.6, 0.1], [-0.14]]", print(A));
+    diff2::Workspace workspace = diff2::build_workspace(network);
+    BOOST_CHECK_EQUAL("[[0, 0], [0, 0], [0]]", print(workspace.A));
+    network.forward(workspace, convert({4.0, 3.0}));
+    BOOST_CHECK_EQUAL("[[4, 3], [-0.8, -0.1], [-0.14]]", print(workspace.A));
+    network.forward(workspace, convert({3.0, 4.0}));
+    BOOST_CHECK_EQUAL("[[3, 4], [-0.6, 0.1], [-0.14]]", print(workspace.A));
 }
 
 BOOST_AUTO_TEST_CASE(test_Workspace)
 {
     diff2::Network network(1, 2, 3, 1);
-    diff2::Workspace workspace(network, false, false, false);
+    diff2::Workspace workspace = diff2::build_workspace(network);
     BOOST_CHECK(!workspace.dA);
     BOOST_CHECK(!workspace.dW);
     BOOST_CHECK(!workspace.v);
@@ -58,18 +57,20 @@ BOOST_AUTO_TEST_CASE(test_Workspace)
 
 BOOST_AUTO_TEST_CASE(test_GradientOptimizer)
 {
-    diff2::Forward fwd;
     diff2::Network network(1, 2, 2, 1);
-    BOOST_CHECK_EQUAL("[[[-0.2, 0], [-0.1, 0.1]], [[0.2, -0.2]]]", print(network.W));
     diff2::GradientOptimizer opt(0.1);
-    diff2::Workspace workspace(network, opt.computes_dA(), opt.computes_dW(), opt.computes_v());
     MSELoss loss;
-    fwd.forward(network, workspace.A, convert({4.0, 3.0}));
-    opt.compute_gradients(network, workspace, loss, convert({1.0}));
+    diff2::Workspace workspace = diff2::build_workspace(network, opt);
+    BOOST_CHECK_EQUAL("[[[-0.2, 0], [-0.1, 0.1]], [[0.2, -0.2]]]", print(network.W));
+
+    network.forward(workspace, convert({4.0, 3.0}));
     BOOST_CHECK_EQUAL("[[4, 3], [-0.8, -0.1], [-0.14]]", print(workspace.A));
+
+    opt.compute_gradients(network, workspace, loss, convert({1.0}));
     BOOST_CHECK_EQUAL("[[[-1.824, -1.368], [1.824, 1.368]], [[1.824, 0.228]]]", print(*workspace.dW));
     BOOST_CHECK_EQUAL("[[0.0456, 0.0456], [-0.456, 0.456], [-2.28]]", print(*workspace.dA));
     BOOST_CHECK_CLOSE(1.2996, workspace.loss, 1e-6);
+
     opt.update_weights(1, network, workspace);
     BOOST_CHECK_EQUAL("[[[-0.0176, 0.1368], [-0.2824, -0.0368]], [[0.0176, -0.2228]]]", print(network.W));
 }

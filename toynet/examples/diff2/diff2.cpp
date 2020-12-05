@@ -50,20 +50,11 @@ Network::Network(int hidden, int width, int inputs, int outputs)
     init_weights(W);
 }
 
-void Forward::forward(const Network& network, std::vector<Tensor1D>& A, const Tensor1D& x) const
+void Network::forward(Workspace& workspace, const Tensor1D& x) const
 {
-    A[0] = x;  // input layer
-    for (int i = 0;  i < network.hidden+1;  ++i)
-        A[i+1] = ublas::prod(network.W[i], A[i]);  // hidden and output layers
-}
-
-Workspace::Workspace(const Network& network, bool needs_dA, bool needs_dW, bool needs_v)
-    : A(network.get1D())
-    , dA(needs_dA ? new std::vector<Tensor1D>(network.get1D()) : nullptr)
-    , dW(needs_dW ? new std::vector<Tensor2D>(network.get2D()) : nullptr)
-    , v(needs_v ? new std::vector<Tensor2D>(network.get2D()) : nullptr)
-    , loss(0.0)
-{
+    workspace.A[0] = x;  // input layer
+    for (int i = 0;  i < hidden+1;  ++i)
+        workspace.A[i+1] = ublas::prod(W[i], workspace.A[i]);  // hidden and output layers
 }
 
 void Workspace::init_before_epoch()
@@ -99,7 +90,6 @@ void GradientOptimizer::compute_gradients(const Network& network, Workspace& wor
 {
     std::tie(workspace.loss, (*workspace.dA)[network.hidden+1]) = loss(y, workspace.A[network.hidden+1]);
     for (int i = network.hidden;  i >= 0;  --i) {
-        // (*workspace.dW)[i] = ublas::prod((*workspace.dA)[i+1], trans(workspace.A[i]));
         (*workspace.dW)[i] = ublas::outer_prod((*workspace.dA)[i+1], trans(workspace.A[i]));
         (*workspace.dA)[i] = ublas::prod(ublas::trans(network.W[i]), (*workspace.dA)[i+1]);
     }
@@ -120,12 +110,28 @@ void MomentumOptimizer::update_weights(int epoch, Network& network, Workspace& w
     }
 }
 
-Trainer::Trainer(Network& network, Loss& loss, Forward& forward, Optimizer& optimizer)
+Workspace build_workspace(const Network& network)
+{
+    Workspace ret;
+    ret.A = network.get1D();
+    return ret;
+}
+
+Workspace build_workspace(const Network& network, const Optimizer& opt)
+{
+    Workspace ret;
+    ret.A = network.get1D();
+    if (opt.computes_dA()) ret.dA.reset(new std::vector<Tensor1D>(network.get1D()));
+    if (opt.computes_dW()) ret.dW.reset(new std::vector<Tensor2D>(network.get2D()));
+    if (opt.computes_v()) ret.v.reset(new std::vector<Tensor2D>(network.get2D()));
+    return ret;
+}
+
+Trainer::Trainer(Network& network, Loss& loss, Optimizer& optimizer)
     : network(network)
     , loss(loss)
-    , forward(forward)
     , optimizer(optimizer)
-    , workspace(network, optimizer.computes_dA(), optimizer.computes_dW(), optimizer.computes_v())
+    , workspace(build_workspace(network, optimizer))
 {
 }
 
@@ -135,8 +141,8 @@ void Trainer::train(int epoch, const std::vector<Tensor1D>& trainingX, const std
     for (int i = 0;  i < trainingX.size();  ++i) {
         const auto& x = trainingX[i];
         const auto& y = trainingY[i];
-        Workspace ex(network, optimizer.computes_dA(), optimizer.computes_dW(), false);
-        forward.forward(network, ex.A, x);
+        Workspace ex = build_workspace(network, optimizer);  // Bug: if optimizer is momentum, we create `v` although we won't use it
+        network.forward(ex, x);
         optimizer.compute_gradients(network, ex, loss, y);
         workspace.add(ex);
     }

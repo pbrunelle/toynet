@@ -11,32 +11,9 @@ namespace diff2 {
 typedef ublas::vector<double> Tensor1D;
 typedef ublas::matrix<double> Tensor2D;
 
-struct Network {
-    Network(int hidden, int width, int inputs, int outputs);
-
-    std::vector<Tensor1D> get1D() const;
-
-    std::vector<Tensor2D> get2D() const;
-
-    int hidden;  // number of hidden layers
-    int width;  // width of hidden layer
-    int inputs;  // width of input layer
-    int outputs;  // width of output layer
-
-    // The weights of the FFN
-    // NOTE - WARNING: we have changed how the weights are indexed compared to `Diff`:
-    // W[layer][unit index of layer][unit index of previous layer]
-    std::vector<Tensor2D> W;
-};
-
-// Computes forwrad activations, computes y_hat
-struct Forward {
-    void forward(const Network& network, std::vector<Tensor1D>& A, const Tensor1D& x) const;
-};
-
 // Holds the required data structures for optimization
 struct Workspace {
-    Workspace(const Network& network, bool needs_dA, bool needs_dW, bool needs_v);
+    Workspace() : loss(0.0) {}
 
     void init_before_epoch();
 
@@ -51,6 +28,27 @@ struct Workspace {
     std::unique_ptr<std::vector<Tensor2D>> dW;  // d(L, network.W)
     std::unique_ptr<std::vector<Tensor2D>> v;  // for momentum
     double loss;
+};
+
+struct Network {
+    Network(int hidden, int width, int inputs, int outputs);
+
+    // Computes forward activations
+    void forward(Workspace& workspace, const Tensor1D& x) const;
+
+    std::vector<Tensor1D> get1D() const;
+
+    std::vector<Tensor2D> get2D() const;
+
+    int hidden;  // number of hidden layers
+    int width;  // width of hidden layer
+    int inputs;  // width of input layer
+    int outputs;  // width of output layer
+
+    // The weights of the FFN
+    // NOTE - WARNING: we have changed how the weights are indexed compared to `Diff`:
+    // W[layer][unit index of layer][unit index of previous layer]
+    std::vector<Tensor2D> W;
 };
 
 struct Optimizer {
@@ -86,8 +84,12 @@ struct MomentumOptimizer : public GradientOptimizer {
     double alpha;  // momentum
 };
 
+Workspace build_workspace(const Network& network);
+
+Workspace build_workspace(const Network& network, const Optimizer& opt);
+
 struct Trainer {
-    Trainer(Network& network, Loss& loss, Forward& forward, Optimizer& optimizer);
+    Trainer(Network& network, Loss& loss, Optimizer& optimizer);
 
     // Train for 1 epoch on a training set
     // Pre-conditions:
@@ -97,7 +99,6 @@ struct Trainer {
 
     Network& network;
     Loss& loss;
-    Forward& forward;
     Optimizer& optimizer;
     Workspace workspace;
 };
