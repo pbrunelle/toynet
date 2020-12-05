@@ -8,11 +8,11 @@ set(CMAKE_CXX_FLAGS "-g")
 
 add_library(
     toynet
+    loss.cpp
     math.cpp
+    w2v.cpp
     ublas/convert.cpp
     ublas/io.cpp
-    w2v.cpp
-    loss.cpp
 )
 
 add_library(
@@ -20,14 +20,20 @@ add_library(
     examples/diff/diff.cpp
 )
 
+add_library(
+    toynet_diff2
+    examples/diff2/diff2.cpp
+)
+
 add_executable(
     unit_tests.tsk
+    loss.t.cpp
+    math.t.cpp
+    w2v.t.cpp
+    examples/diff/diff.t.cpp
+    examples/diff2/diff2.t.cpp
     ublas/convert.t.cpp
     ublas/io.t.cpp
-    w2v.t.cpp
-    math.t.cpp
-    examples/diff/diff.t.cpp
-    loss.t.cpp
 )
 
 add_executable(
@@ -37,10 +43,11 @@ add_executable(
 
 target_include_directories(toynet PRIVATE .. ${Boost_INCLUDE_DIRS})
 target_include_directories(toynet_diff PRIVATE .. ${Boost_INCLUDE_DIRS})
+target_include_directories(toynet_diff2 PRIVATE .. ${Boost_INCLUDE_DIRS})
 target_include_directories(unit_tests.tsk PRIVATE .. ${Boost_INCLUDE_DIRS})
 target_include_directories(diff.tsk PRIVATE .. ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(toynet PUBLIC)
 target_link_libraries(toynet_diff PUBLIC)
-target_link_libraries(unit_tests.tsk PRIVATE toynet_diff toynet ${Boost_LIBRARIES} rt)
+target_link_libraries(unit_tests.tsk PRIVATE toynet_diff toynet_diff2 toynet ${Boost_LIBRARIES} rt)
 target_link_libraries(diff.tsk PRIVATE toynet_diff toynet ${Boost_LIBRARIES} rt)
