@@ -114,4 +114,39 @@ BOOST_AUTO_TEST_CASE(test_GradientOptimizer_divergence)
 
 BOOST_AUTO_TEST_CASE(test_MomentumOptimizer)
 {
+    const double lr = 0.5;
+    const double alpha = 0.8;
+    const diff2::Tensor1D x = convert({4.0, 3.0});
+    const diff2::Tensor1D y = convert({1.0});
+
+    diff2::Network network(1, 2, 2, 1);
+    diff2::MomentumOptimizer opt(lr, alpha);
+    MSELoss loss;
+    diff2::Workspace workspace = diff2::build_workspace(network, opt);
+    BOOST_REQUIRE(workspace.v);
+
+    // First epoch -- same as GradientOptimizer because `v` is initially 0
+    network.forward(workspace, x);
+    opt.compute_gradients(network, workspace, loss, y);
+    opt.update_weights(1, network, workspace);
+    BOOST_CHECK_EQUAL("[[4, 3], [-0.8, -0.1], [-0.14]]", print(workspace.A));
+    BOOST_CHECK_EQUAL("[[[-1.824, -1.368], [1.824, 1.368]], [[1.824, 0.228]]]", print(*workspace.dW));
+    BOOST_CHECK_EQUAL("[[[0.912, 0.684], [-0.912, -0.684]], [[-0.912, -0.114]]]", print(*workspace.v));
+    BOOST_CHECK_EQUAL("[[[0.712, 0.684], [-1.012, -0.584]], [[-0.712, -0.314]]]", print(network.W));
+    BOOST_CHECK_CLOSE(1.2996, workspace.loss, 1e-6);
+
+    // Second epoch
+    network.forward(workspace, x);
+    opt.compute_gradients(network, workspace, loss, y);
+    opt.update_weights(2, network, workspace);
+    BOOST_CHECK_EQUAL("[[[15.1946, 11.396], [6.70101, 5.02576]], [[-26.1425, 30.9442]]]", print(*workspace.dW));
+    BOOST_CHECK_EQUAL("[[[-6.86772, -5.15079], [-4.08011, -3.06008]], [[12.3416, -15.5633]]]", print(*workspace.v));
+    BOOST_CHECK_EQUAL("[[[-6.15572, -4.46679], [-5.09211, -3.64408]], [[11.6296, -15.8773]]]", print(network.W));
+    BOOST_CHECK_CLOSE(7.11608976, workspace.loss, 1e-6);
+
+    // Third epoch (forward and loss)
+    network.forward(workspace, x);
+    opt.compute_gradients(network, workspace, loss, y);
+    BOOST_CHECK_EQUAL("[[4, 3], [-38.0233, -31.3007], [54.7723]]", print(workspace.A));
+    BOOST_CHECK_CLOSE(2891.45863, workspace.loss, 1e-6);
 }
