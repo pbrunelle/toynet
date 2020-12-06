@@ -50,6 +50,13 @@ Network::Network(int hidden, int width, int inputs, int outputs)
     init_weights(W);
 }
 
+Tensor1D Network::predict(const Tensor1D& x) const
+{
+    Workspace workspace = build_workspace(*this);
+    forward(workspace, x);
+    return workspace.A.back();
+}
+
 void Network::forward(Workspace& workspace, const Tensor1D& x) const
 {
     workspace.A[0] = x;  // input layer
@@ -90,7 +97,7 @@ void GradientOptimizer::compute_gradients(const Network& network, Workspace& wor
 {
     std::tie(workspace.loss, (*workspace.dA)[network.hidden+1]) = loss(y, workspace.A[network.hidden+1]);
     for (int i = network.hidden;  i >= 0;  --i) {
-        (*workspace.dW)[i] = ublas::outer_prod((*workspace.dA)[i+1], trans(workspace.A[i]));
+        (*workspace.dW)[i] = ublas::outer_prod((*workspace.dA)[i+1], ublas::trans(workspace.A[i]));
         (*workspace.dA)[i] = ublas::prod(ublas::trans(network.W[i]), (*workspace.dA)[i+1]);
     }
 }

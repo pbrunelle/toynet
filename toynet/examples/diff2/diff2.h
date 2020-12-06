@@ -33,6 +33,8 @@ struct Workspace {
 struct Network {
     Network(int hidden, int width, int inputs, int outputs);
 
+    Tensor1D predict(const Tensor1D& x) const;
+
     // Computes forward activations
     void forward(Workspace& workspace, const Tensor1D& x) const;
 
