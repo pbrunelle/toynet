@@ -54,7 +54,7 @@ struct Network {
 };
 
 struct Optimizer {
-    virtual void compute_gradients(const Network& network, Workspace& workspace, Loss& loss, const Tensor1D& y) const = 0;
+    virtual void compute_gradients(const Network& network, Workspace& workspace, const Loss& loss, const Tensor1D& y) const = 0;
     virtual void update_weights(int epoch, Network& network, Workspace& workspace) const = 0;
 
     virtual bool computes_dA() const {return false;}
@@ -65,7 +65,7 @@ struct Optimizer {
 struct GradientOptimizer : public Optimizer {
     GradientOptimizer(double lr) : lr(lr) {}
 
-    virtual void compute_gradients(const Network& network, Workspace& workspace, Loss& loss, const Tensor1D& y) const override;
+    virtual void compute_gradients(const Network& network, Workspace& workspace, const Loss& loss, const Tensor1D& y) const override;
     virtual void update_weights(int epoch, Network& network, Workspace& workspace) const override;
 
     virtual bool computes_dA() const override {return true;}
@@ -91,7 +91,7 @@ Workspace build_workspace(const Network& network);
 Workspace build_workspace(const Network& network, const Optimizer& opt);
 
 struct Trainer {
-    Trainer(Network& network, Loss& loss, Optimizer& optimizer);
+    Trainer(Network& network, const Loss& loss, const Optimizer& optimizer);
 
     // Train for 1 epoch on a training set
     // Pre-conditions:
@@ -100,8 +100,8 @@ struct Trainer {
     void train(int epoch, const std::vector<Tensor1D>& trainingX, const std::vector<Tensor1D>& trainingY);
 
     Network& network;
-    Loss& loss;
-    Optimizer& optimizer;
+    const Loss& loss;
+    const Optimizer& optimizer;
     Workspace workspace;
 };
 

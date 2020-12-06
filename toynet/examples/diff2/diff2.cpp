@@ -94,7 +94,7 @@ void Workspace::average(int n)
     loss /= n;
 }
 
-void GradientOptimizer::compute_gradients(const Network& network, Workspace& workspace, Loss& loss, const Tensor1D &y) const
+void GradientOptimizer::compute_gradients(const Network& network, Workspace& workspace, const Loss& loss, const Tensor1D &y) const
 {
     std::tie(workspace.loss, (*workspace.dA)[network.hidden+1]) = loss(y, workspace.A[network.hidden+1]);
     for (int i = network.hidden;  i >= 0;  --i) {
@@ -135,7 +135,7 @@ Workspace build_workspace(const Network& network, const Optimizer& opt)
     return ret;
 }
 
-Trainer::Trainer(Network& network, Loss& loss, Optimizer& optimizer)
+Trainer::Trainer(Network& network, const Loss& loss, const Optimizer& optimizer)
     : network(network)
     , loss(loss)
     , optimizer(optimizer)

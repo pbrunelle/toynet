@@ -151,12 +151,11 @@ BOOST_AUTO_TEST_CASE(test_MomentumOptimizer)
     BOOST_CHECK_CLOSE(2891.45863, workspace.loss, 1e-6);
 }
 
-BOOST_AUTO_TEST_CASE(test_Trainer_train_1_example)
+void help_test_Trainer_train_1_example(const diff2::Optimizer& opt)
 {
     const std::vector<diff2::Tensor1D> x{convert({4.0, 3.0})};
     const std::vector<diff2::Tensor1D> y{convert({1.0})};
     diff2::Network network(1, 2, 2, 1);
-    diff2::GradientOptimizer opt(0.05);
     MSELoss loss;
     diff2::Trainer trainer(network, loss, opt);
     for (int e = 1;  e <= 10;  ++e) {
@@ -166,3 +165,15 @@ BOOST_AUTO_TEST_CASE(test_Trainer_train_1_example)
     BOOST_CHECK(trainer.workspace.loss < 1e-6);
     BOOST_CHECK_CLOSE(network.predict(x[0])[0], 1.0, 1e-6);
 }
+
+BOOST_AUTO_TEST_CASE(test_Trainer_train_1_example_GradientOptimizer)
+{
+    help_test_Trainer_train_1_example(diff2::GradientOptimizer(0.05));
+}
+
+#if 0 // For this problem, momentum gives worse convergence than gradient
+BOOST_AUTO_TEST_CASE(test_Trainer_train_1_example_MomentumOptimizer)
+{
+    help_test_Trainer_train_1_example(diff2::MomentumOptimizer(0.02, 0.8));
+}
+#endif
