@@ -148,7 +148,7 @@ void Trainer::train(int epoch, const std::vector<Tensor1D>& trainingX, const std
     for (int i = 0;  i < trainingX.size();  ++i) {
         const auto& x = trainingX[i];
         const auto& y = trainingY[i];
-        Workspace ex = build_workspace(network, optimizer);  // Bug: if optimizer is momentum, we create `v` although we won't use it
+        Workspace ex = build_workspace(network, optimizer);  // Bug: if optimizer is gradient, we needlessly create `v`
         network.forward(ex, x);
         optimizer.compute_gradients(network, ex, loss, y);
         workspace.add(ex);
