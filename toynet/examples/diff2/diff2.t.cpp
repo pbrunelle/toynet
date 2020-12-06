@@ -150,3 +150,19 @@ BOOST_AUTO_TEST_CASE(test_MomentumOptimizer)
     BOOST_CHECK_EQUAL("[[4, 3], [-38.0233, -31.3007], [54.7723]]", print(workspace.A));
     BOOST_CHECK_CLOSE(2891.45863, workspace.loss, 1e-6);
 }
+
+BOOST_AUTO_TEST_CASE(test_Trainer_train_1_example)
+{
+    const std::vector<diff2::Tensor1D> x{convert({4.0, 3.0})};
+    const std::vector<diff2::Tensor1D> y{convert({1.0})};
+    diff2::Network network(1, 2, 2, 1);
+    diff2::GradientOptimizer opt(0.05);
+    MSELoss loss;
+    diff2::Trainer trainer(network, loss, opt);
+    for (int e = 1;  e <= 10;  ++e) {
+        trainer.train(e, x, y);
+        // std::cout << e << " " << trainer.workspace.loss << " " << network.predict(x[0]) << std::endl;
+    }
+    BOOST_CHECK(trainer.workspace.loss < 1e-6);
+    BOOST_CHECK_CLOSE(network.predict(x[0])[0], 1.0, 1e-6);
+}

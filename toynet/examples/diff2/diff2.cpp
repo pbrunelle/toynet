@@ -75,6 +75,7 @@ void Workspace::init_before_epoch()
     if (dW)
         for (auto& x : *dW)
             x = ublas::scalar_matrix<double>(x.size1(), x.size2(), 0.0);
+    loss = 0.0;
 }
 
 void Workspace::add(const Workspace& ex)
