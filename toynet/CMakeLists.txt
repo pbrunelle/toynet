@@ -41,13 +41,21 @@ add_executable(
     examples/diff/diff.m.cpp
 )
 
+add_executable(
+    diff2.tsk
+    examples/diff2/diff2.m.cpp
+)
+
 target_include_directories(toynet PRIVATE .. ${Boost_INCLUDE_DIRS})
 target_include_directories(toynet_diff PRIVATE .. ${Boost_INCLUDE_DIRS})
 target_include_directories(toynet_diff2 PRIVATE .. ${Boost_INCLUDE_DIRS})
 target_include_directories(unit_tests.tsk PRIVATE .. ${Boost_INCLUDE_DIRS})
 target_include_directories(diff.tsk PRIVATE .. ${Boost_INCLUDE_DIRS})
+target_include_directories(diff2.tsk PRIVATE .. ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(toynet PUBLIC)
 target_link_libraries(toynet_diff PUBLIC)
+target_link_libraries(toynet_diff2 PUBLIC)
 target_link_libraries(unit_tests.tsk PRIVATE toynet_diff toynet_diff2 toynet ${Boost_LIBRARIES} rt)
 target_link_libraries(diff.tsk PRIVATE toynet_diff toynet ${Boost_LIBRARIES} rt)
+target_link_libraries(diff2.tsk PRIVATE toynet_diff2 toynet ${Boost_LIBRARIES} rt)
