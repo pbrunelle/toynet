@@ -30,24 +30,43 @@ std::vector<Tensor2D> Network::get2D() const
     return V;
 }
 
-void init_weights(std::vector<Tensor2D>& W)
+void FixedWeightInitializer::initialize(std::vector<Tensor2D>& W) const
 {
     const std::vector<double> pool{-0.2, -0.1, 0.0, 0.1, 0.2};
     int n = 0;
-    for (int i = 0;  i < W.size();  ++i)
-        for (int k = 0;  k < W[i].size2();  ++k)
-            for (int j = 0;  j < W[i].size1();  ++j)
-                W[i](j, k) = pool[n++ % pool.size()];
+    for (auto& m : W)
+        for (int k = 0;  k < m.size2();  ++k)
+            for (int j = 0;  j < m.size1();  ++j)
+                m(j, k) = pool[n++ % pool.size()];
 }
 
-Network::Network(int hidden, int width, int inputs, int outputs)
+GlorotBengio2010Initializer::GlorotBengio2010Initializer(double seed)
+    : rng(seed)
+{
+}
+
+void GlorotBengio2010Initializer::initialize(std::vector<Tensor2D>& W) const
+{
+    for (auto& m : W) {
+        int denom = std::max<int>(1, m.size1() + m.size2());
+        double v = std::sqrt(6.0 / denom);
+        std::uniform_real_distribution<> dist(-v, v);
+        for (int i = 0;  i < m.size1();  ++i)
+            for (int j = 0;  j < m.size2();  ++j)
+                m(i, j) = dist(rng);
+    }
+}
+
+Network::Network(int hidden, int width, int inputs, int outputs,
+                 const WeightInitializer *initializer)
     : hidden(hidden)
     , width(width)
     , inputs(inputs)
     , outputs(outputs)
     , W(get2D())
 {
-    init_weights(W);
+    if (initializer)
+        initializer->initialize(W);
 }
 
 Tensor1D Network::predict(const Tensor1D& x) const

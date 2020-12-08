@@ -1,6 +1,7 @@
 #include <toynet/ublas/ublas.h>
 #include <toynet/loss.h>
 #include <iostream>
+#include <random>
 #include <vector>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/vector.hpp>
@@ -30,8 +31,25 @@ struct Workspace {
     double loss;
 };
 
+struct WeightInitializer {
+    virtual void initialize(std::vector<Tensor2D>& W) const = 0;
+};
+
+struct FixedWeightInitializer : public WeightInitializer {
+    virtual void initialize(std::vector<Tensor2D>& W) const override;
+};
+
+// W(i,j) ~ U(-sqrt(6/(m+n)), sqrt(6/(m+n)))
+// Where: m = number of input units, n = number of output units
+struct GlorotBengio2010Initializer : public WeightInitializer {
+    GlorotBengio2010Initializer(double seed=0.0);
+    virtual void initialize(std::vector<Tensor2D>& W) const override;
+    mutable std::mt19937 rng;
+};
+
 struct Network {
-    Network(int hidden, int width, int inputs, int outputs);
+    Network(int hidden, int width, int inputs, int outputs,
+            const WeightInitializer *initializer=0);
 
     Tensor1D predict(const Tensor1D& x) const;
 

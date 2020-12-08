@@ -3,7 +3,6 @@
 #include <toynet/ublas/io.h>
 #include <toynet/ublas/convert.h>
 #include <iostream>
-#include <random>
 #include <boost/test/unit_test.hpp>
 
 using namespace toynet;
@@ -14,6 +13,25 @@ std::string print(const T& v)
     std::ostringstream oss;
     oss << v;
     return oss.str();
+}
+
+BOOST_AUTO_TEST_CASE(test_GlorotBengio2010Initializer_empty)
+{
+    diff2::GlorotBengio2010Initializer initializer;
+
+    std::vector<diff2::Tensor2D> W{
+        diff2::Tensor2D(5, 1),
+        diff2::Tensor2D(580, 20)
+    };
+    initializer.initialize(W);
+
+    for (int i = 0;  i < W[0].size1();  ++i)
+        for (int j = 0;  j < W[0].size2();  ++j)
+            BOOST_CHECK(W[0](i, j) <= 1.0 && W[0](i, j) >= -1.0);
+
+    for (int i = 0;  i < W[1].size1();  ++i)
+        for (int j = 0;  j < W[1].size2();  ++j)
+            BOOST_CHECK(W[1](i, j) <= 0.1 && W[1](i, j) >= -0.1);
 }
 
 BOOST_AUTO_TEST_CASE(test_Network)
@@ -32,7 +50,8 @@ BOOST_AUTO_TEST_CASE(test_Network)
 
 BOOST_AUTO_TEST_CASE(test_Forward)
 {
-    diff2::Network network(1, 2, 2, 1);
+    diff2::FixedWeightInitializer initializer;
+    diff2::Network network(1, 2, 2, 1, &initializer);
     diff2::Workspace workspace = diff2::build_workspace(network);
     BOOST_CHECK_EQUAL("[[0, 0], [0, 0], [0]]", print(workspace.A));
     network.forward(workspace, convert({4.0, 3.0}));
@@ -57,7 +76,8 @@ BOOST_AUTO_TEST_CASE(test_Workspace)
 
 BOOST_AUTO_TEST_CASE(test_GradientOptimizer)
 {
-    diff2::Network network(1, 2, 2, 1);
+    diff2::FixedWeightInitializer initializer;
+    diff2::Network network(1, 2, 2, 1, &initializer);
     diff2::GradientOptimizer opt(0.1);
     MSELoss loss;
     diff2::Workspace workspace = diff2::build_workspace(network, opt);
@@ -82,7 +102,8 @@ BOOST_AUTO_TEST_CASE(test_GradientOptimizer_divergence)
     const diff2::Tensor1D x = convert({4.0, 3.0});
     const diff2::Tensor1D y = convert({1.0});
 
-    diff2::Network network(1, 2, 2, 1);
+    diff2::FixedWeightInitializer initializer;
+    diff2::Network network(1, 2, 2, 1, &initializer);
     diff2::GradientOptimizer opt(lr);
     MSELoss loss;
     diff2::Workspace workspace = diff2::build_workspace(network, opt);
@@ -119,7 +140,8 @@ BOOST_AUTO_TEST_CASE(test_MomentumOptimizer)
     const diff2::Tensor1D x = convert({4.0, 3.0});
     const diff2::Tensor1D y = convert({1.0});
 
-    diff2::Network network(1, 2, 2, 1);
+    diff2::FixedWeightInitializer initializer;
+    diff2::Network network(1, 2, 2, 1, &initializer);
     diff2::MomentumOptimizer opt(lr, alpha);
     MSELoss loss;
     diff2::Workspace workspace = diff2::build_workspace(network, opt);
@@ -155,7 +177,8 @@ void help_test_Trainer_train_1_example(const diff2::Optimizer& opt)
 {
     const std::vector<diff2::Tensor1D> x{convert({4.0, 3.0})};
     const std::vector<diff2::Tensor1D> y{convert({1.0})};
-    diff2::Network network(1, 2, 2, 1);
+    diff2::FixedWeightInitializer initializer;
+    diff2::Network network(1, 2, 2, 1, &initializer);
     MSELoss loss;
     diff2::Trainer trainer(network, loss, opt);
     for (int e = 1;  e <= 10;  ++e) {

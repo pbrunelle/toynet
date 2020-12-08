@@ -4,7 +4,6 @@
 #include <toynet/ublas/convert.h>
 #include <iostream>
 #include <sstream>
-#include <random>
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -21,19 +20,21 @@ void print(const boost::property_tree::ptree& pt)
     }
 }
 
-std::vector<ublas::vector<double>> parse_json_examples(const std::string& s)
+std::vector<diff2::Tensor1D> parse_json_examples(const std::string& s)
 {
-    std::vector<ublas::vector<double>> ret;
-    std::stringstream ss(s);
-    boost::property_tree::ptree pt;
-    boost::property_tree::read_json(ss, pt);
-    for (const auto& e1 : pt) {
-        ublas::vector<double> v;
-        for (const auto& e2 : e1.second) {
-            v.resize(v.size() + 1);
-            v[v.size() - 1] = e2.second.get_value<double>();
+    std::vector<diff2::Tensor1D> ret;
+    if (!s.empty()) {
+        std::stringstream ss(s);
+        boost::property_tree::ptree pt;
+        boost::property_tree::read_json(ss, pt);
+        for (const auto& e1 : pt) {
+            diff2::Tensor1D v;
+            for (const auto& e2 : e1.second) {
+                v.resize(v.size() + 1);
+                v[v.size() - 1] = e2.second.get_value<double>();
+            }
+            ret.push_back(v);
         }
-        ret.push_back(v);
     }
     return ret;
 }
@@ -56,6 +57,8 @@ struct Options
     bool progress;
     std::string loss;
     std::string optimizer;
+    std::string initializer;
+    double seed;
 
     Options(int argc, char* argv[])
         : desc("Allowed options")
@@ -73,6 +76,8 @@ struct Options
         , progress(true)
         , loss("mse")
         , optimizer("gradient")
+        , initializer("fixed")
+        , seed(0.0)
     {
         desc.add_options()
             // First parameter describes option name/short name
@@ -92,6 +97,8 @@ struct Options
             ("progress", value(&progress), "show loss at each epoch")
             ("loss", value(&loss), "loss function")
             ("optimizer", value(&optimizer), "optimizer")
+            ("initializer", value(&initializer), "weight initializer")
+            ("seed", value(&seed), "rng seed")
             ;
         store(parse_command_line(argc, argv, desc), vm);
         notify(vm);
@@ -114,6 +121,15 @@ std::unique_ptr<diff2::Optimizer> get_optimizer(const std::string& name, double 
     if (name == "momentum")
         return std::make_unique<diff2::MomentumOptimizer>(lr, alpha);
     throw std::runtime_error("unknown optimizer: " + name);
+}
+
+std::unique_ptr<diff2::WeightInitializer> get_initializer(const std::string& name, double seed)
+{
+    if (name == "fixed")
+        return std::make_unique<diff2::FixedWeightInitializer>();
+    if (name == "glorot")
+        return std::make_unique<diff2::GlorotBengio2010Initializer>(seed);
+    throw std::runtime_error("unknown initializer: " + name);
 }
 
 int main(int argc, char* argv[])
@@ -159,9 +175,10 @@ int main(int argc, char* argv[])
         }
     }
 
-    diff2::Network network(opts.hidden, opts.width, opts.inputs, opts.outputs);
+    std::unique_ptr<diff2::WeightInitializer> initializer = get_initializer(opts.initializer, opts.seed);
     std::unique_ptr<Loss> loss = get_loss(opts.loss);
     std::unique_ptr<diff2::Optimizer> opt = get_optimizer(opts.optimizer, opts.lr, opts.alpha);
+    diff2::Network network(opts.hidden, opts.width, opts.inputs, opts.outputs, initializer.get());
     diff2::Trainer trainer(network, *loss, *opt);
     for (int e = 1;  e <= opts.epochs;  ++e) {
         trainer.train(e, training_X, training_Y);
