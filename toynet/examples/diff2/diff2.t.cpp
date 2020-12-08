@@ -50,8 +50,8 @@ BOOST_AUTO_TEST_CASE(test_Network)
 
 BOOST_AUTO_TEST_CASE(test_Forward)
 {
-    diff2::FixedWeightInitializer initializer;
-    diff2::Network network(1, 2, 2, 1, &initializer);
+    diff2::Network network(1, 2, 2, 1);
+    diff2::FixedWeightInitializer().initialize(network.W);
     diff2::Workspace workspace = diff2::build_workspace(network);
     BOOST_CHECK_EQUAL("[[0, 0], [0, 0], [0]]", print(workspace.A));
     network.forward(workspace, convert({4.0, 3.0}));
@@ -76,8 +76,8 @@ BOOST_AUTO_TEST_CASE(test_Workspace)
 
 BOOST_AUTO_TEST_CASE(test_GradientOptimizer)
 {
-    diff2::FixedWeightInitializer initializer;
-    diff2::Network network(1, 2, 2, 1, &initializer);
+    diff2::Network network(1, 2, 2, 1);
+    diff2::FixedWeightInitializer().initialize(network.W);
     diff2::GradientOptimizer opt(0.1);
     MSELoss loss;
     diff2::Workspace workspace = diff2::build_workspace(network, opt);
@@ -102,8 +102,8 @@ BOOST_AUTO_TEST_CASE(test_GradientOptimizer_divergence)
     const diff2::Tensor1D x = convert({4.0, 3.0});
     const diff2::Tensor1D y = convert({1.0});
 
-    diff2::FixedWeightInitializer initializer;
-    diff2::Network network(1, 2, 2, 1, &initializer);
+    diff2::Network network(1, 2, 2, 1);
+    diff2::FixedWeightInitializer().initialize(network.W);
     diff2::GradientOptimizer opt(lr);
     MSELoss loss;
     diff2::Workspace workspace = diff2::build_workspace(network, opt);
@@ -140,8 +140,8 @@ BOOST_AUTO_TEST_CASE(test_MomentumOptimizer)
     const diff2::Tensor1D x = convert({4.0, 3.0});
     const diff2::Tensor1D y = convert({1.0});
 
-    diff2::FixedWeightInitializer initializer;
-    diff2::Network network(1, 2, 2, 1, &initializer);
+    diff2::Network network(1, 2, 2, 1);
+    diff2::FixedWeightInitializer().initialize(network.W);
     diff2::MomentumOptimizer opt(lr, alpha);
     MSELoss loss;
     diff2::Workspace workspace = diff2::build_workspace(network, opt);
@@ -173,30 +173,32 @@ BOOST_AUTO_TEST_CASE(test_MomentumOptimizer)
     BOOST_CHECK_CLOSE(2891.45863, workspace.loss, 1e-6);
 }
 
-void help_test_Trainer_train_1_example(const diff2::Optimizer& opt)
+void help_test_Trainer_train_1_example(const std::shared_ptr<diff2::Optimizer> opt)
 {
     const std::vector<diff2::Tensor1D> x{convert({4.0, 3.0})};
     const std::vector<diff2::Tensor1D> y{convert({1.0})};
-    diff2::FixedWeightInitializer initializer;
-    diff2::Network network(1, 2, 2, 1, &initializer);
-    MSELoss loss;
-    diff2::Trainer trainer(network, loss, opt);
+    diff2::Network network(1, 2, 2, 1);
+    diff2::Trainer trainer(network);
+    trainer.initializer(NULL)
+           .loss(std::make_shared<MSELoss>())
+           .optimizer(opt);
+    diff2::FixedWeightInitializer().initialize(network.W);
     for (int e = 1;  e <= 10;  ++e) {
         trainer.train(e, x, y);
         // std::cout << e << " " << trainer.workspace.loss << " " << network.predict(x[0]) << std::endl;
     }
-    BOOST_CHECK(trainer.workspace.loss < 1e-6);
+    BOOST_CHECK(trainer.workspace().loss < 1e-6);
     BOOST_CHECK_CLOSE(network.predict(x[0])[0], 1.0, 1e-6);
 }
 
 BOOST_AUTO_TEST_CASE(test_Trainer_train_1_example_GradientOptimizer)
 {
-    help_test_Trainer_train_1_example(diff2::GradientOptimizer(0.05));
+    help_test_Trainer_train_1_example(std::make_shared<diff2::GradientOptimizer>(0.05));
 }
 
 #if 0 // For this problem, momentum gives worse convergence than gradient
 BOOST_AUTO_TEST_CASE(test_Trainer_train_1_example_MomentumOptimizer)
 {
-    help_test_Trainer_train_1_example(diff2::MomentumOptimizer(0.02, 0.8));
+    help_test_Trainer_train_1_example(std::make_shared<diff2::MomentumOptimizer>(0.02, 0.8));
 }
 #endif

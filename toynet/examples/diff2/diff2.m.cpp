@@ -175,17 +175,21 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::unique_ptr<diff2::WeightInitializer> initializer = get_initializer(opts.initializer, opts.seed);
-    std::unique_ptr<Loss> loss = get_loss(opts.loss);
-    std::unique_ptr<diff2::Optimizer> opt = get_optimizer(opts.optimizer, opts.lr, opts.alpha);
-    diff2::Network network(opts.hidden, opts.width, opts.inputs, opts.outputs, initializer.get());
-    diff2::Trainer trainer(network, *loss, *opt);
+    diff2::Network network(opts.hidden, opts.width, opts.inputs, opts.outputs);
+    std::shared_ptr<diff2::WeightInitializer> initializer = get_initializer(opts.initializer, opts.seed);
+    std::shared_ptr<Loss> loss = get_loss(opts.loss);
+    std::shared_ptr<diff2::Optimizer> opt = get_optimizer(opts.optimizer, opts.lr, opts.alpha);
+    diff2::Trainer trainer(network);
+    trainer.initializer(NULL)
+           .loss(loss)
+           .optimizer(opt);
+    initializer->initialize(network.W);
     for (int e = 1;  e <= opts.epochs;  ++e) {
         trainer.train(e, training_X, training_Y);
         if (opts.progress)
-            std::cout << e << " " << trainer.workspace.loss << std::endl;
+            std::cout << e << " " << trainer.workspace().loss << std::endl;
     }
-    std::cout << "loss " << trainer.workspace.loss << " weights " << network.W << std::endl;
+    std::cout << "loss " << trainer.workspace().loss << " weights " << network.W << std::endl;
 
     for (const auto&v : testing)
         std::cout << v << " -> " << network.predict(v) << std::endl;
