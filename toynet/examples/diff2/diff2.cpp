@@ -57,16 +57,13 @@ void GlorotBengio2010Initializer::initialize(std::vector<Tensor2D>& W) const
     }
 }
 
-Network::Network(int hidden, int width, int inputs, int outputs,
-                 const WeightInitializer *initializer)
+Network::Network(int hidden, int width, int inputs, int outputs)
     : hidden(hidden)
     , width(width)
     , inputs(inputs)
     , outputs(outputs)
     , W(get2D())
 {
-    if (initializer)
-        initializer->initialize(W);
 }
 
 Tensor1D Network::predict(const Tensor1D& x) const
@@ -154,27 +151,49 @@ Workspace build_workspace(const Network& network, const Optimizer& opt)
     return ret;
 }
 
-Trainer::Trainer(Network& network, const Loss& loss, const Optimizer& optimizer)
-    : network(network)
-    , loss(loss)
-    , optimizer(optimizer)
-    , workspace(build_workspace(network, optimizer))
+Trainer::Trainer(Network& network)
+    : d_network(network)
+    , d_initializer(new FixedWeightInitializer())
+    , d_loss(new MSELoss())
+    , d_optimizer(new GradientOptimizer(0.01))
+    , d_workspace(build_workspace(network, *d_optimizer))
 {
+}
+
+Trainer& Trainer::initializer(std::shared_ptr<WeightInitializer> initializer)
+{
+    d_initializer = initializer;
+    return *this;
+}
+
+Trainer& Trainer::loss(std::shared_ptr<Loss> loss)
+{
+    d_loss = loss;
+    return *this;
+}
+
+Trainer& Trainer::optimizer(std::shared_ptr<Optimizer> optimizer)
+{
+    d_optimizer = optimizer;
+    d_workspace = build_workspace(d_network, *d_optimizer);
+    return *this;
 }
 
 void Trainer::train(int epoch, const std::vector<Tensor1D>& trainingX, const std::vector<Tensor1D>& trainingY)
 {
-    workspace.init_before_epoch();
+    if (d_initializer)
+        d_initializer->initialize(d_network.W);
+    d_workspace.init_before_epoch();
     for (int i = 0;  i < trainingX.size();  ++i) {
         const auto& x = trainingX[i];
         const auto& y = trainingY[i];
-        Workspace ex = build_workspace(network, optimizer);  // Bug: if optimizer is gradient, we needlessly create `v`
-        network.forward(ex, x);
-        optimizer.compute_gradients(network, ex, loss, y);
-        workspace.add(ex);
+        Workspace ex = build_workspace(d_network, *d_optimizer);  // Bug: if optimizer is gradient, we needlessly create `v`
+        d_network.forward(ex, x);
+        d_optimizer->compute_gradients(d_network, ex, *d_loss, y);
+        d_workspace.add(ex);
     }
-    workspace.average(trainingX.size());
-    optimizer.update_weights(epoch, network, workspace);
+    d_workspace.average(trainingX.size());
+    d_optimizer->update_weights(epoch, d_network, d_workspace);
 }
 
 } // namespace diff2

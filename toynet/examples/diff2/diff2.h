@@ -48,8 +48,7 @@ struct GlorotBengio2010Initializer : public WeightInitializer {
 };
 
 struct Network {
-    Network(int hidden, int width, int inputs, int outputs,
-            const WeightInitializer *initializer=0);
+    Network(int hidden, int width, int inputs, int outputs);
 
     Tensor1D predict(const Tensor1D& x) const;
 
@@ -108,8 +107,16 @@ Workspace build_workspace(const Network& network);
 
 Workspace build_workspace(const Network& network, const Optimizer& opt);
 
-struct Trainer {
-    Trainer(Network& network, const Loss& loss, const Optimizer& optimizer);
+class Trainer {
+public:
+    Trainer(Network& network);
+
+    // Chained setters
+    Trainer& initializer(std::shared_ptr<WeightInitializer>);
+    Trainer& loss(std::shared_ptr<Loss>);
+    Trainer& optimizer(std::shared_ptr<Optimizer>);
+
+    const Workspace& workspace() const {return d_workspace;}
 
     // Train for 1 epoch on a training set
     // Pre-conditions:
@@ -117,10 +124,12 @@ struct Trainer {
     // - trainingX.size() >= 1
     void train(int epoch, const std::vector<Tensor1D>& trainingX, const std::vector<Tensor1D>& trainingY);
 
-    Network& network;
-    const Loss& loss;
-    const Optimizer& optimizer;
-    Workspace workspace;
+private:
+    Network& d_network;
+    std::shared_ptr<WeightInitializer> d_initializer;
+    std::shared_ptr<Loss> d_loss;
+    std::shared_ptr<Optimizer> d_optimizer;
+    Workspace d_workspace;
 };
 
 } // namespace diff2
